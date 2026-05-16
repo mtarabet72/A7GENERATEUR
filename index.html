@@ -193,8 +193,21 @@
 })();</script>
 <script>window.Intl=window.Intl||{};Intl.t=function(s){return(Intl._locale&&Intl._locale[s])||s;};</script>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-<title>Génération A7 — Affichettes Hypermarché</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>A7 v2.1 — Marjane Tanger 08</title>
+
+<!-- ===== PWA META ===== -->
+<meta name="theme-color" content="#1a120a">
+<meta name="background-color" content="#0d0a06">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Génération A7">
+<meta name="application-name" content="Génération A7">
+<meta name="description" content="Système professionnel de génération d'affichettes A7 pour hypermarché – bilingue FR/AR">
+<link rel="manifest" href="manifest.json">
+<!-- Apple splash / icon hints -->
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%231a120a'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle' fill='%23f59e0b'%3E🏷%3C/text%3E%3C/svg%3E">
 <link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:ital,wght@0,400;0,600;0,700;0,800;0,900;1,700&family=Barlow:wght@400;500;600&family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans+Arabic:wght@400;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 <style>
@@ -210,7 +223,7 @@
 }
 </style>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
-<script src="https://unpkg.com/html5-qrcode@2.3.10/html5-qrcode.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html5-qrcode/2.3.8/html5-qrcode.min.js" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/remixicon/4.2.0/remixicon.min.css">
 <style>
 :root{
@@ -348,22 +361,6 @@ tr:hover td{background:var(--surf3)}
 #logoutBtn{cursor:pointer;background:transparent;border:1px solid var(--border2);border-radius:8px;padding:6px 10px;color:var(--text3);font-size:12px;transition:all .15s}
 #logoutBtn:hover{border-color:var(--red);color:var(--red)}
 </style>
-
-<meta name="theme-color" content="#0a0804">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="mobile-web-app-capable" content="yes">
-<link rel="manifest" href="data:application/manifest+json;base64,eyJuYW1lIjoiR8OpbsOpcmF0aW9uIEE3IFBybyIsInNob3J0X25hbWUiOiJBNyBQcm8iLCJzdGFydF91cmwiOiIuLyIsImRpc3BsYXkiOiJzdGFuZGFsb25lIiwiYmFja2dyb3VuZF9jb2xvciI6IiMwYTA4MDQiLCJ0aGVtZV9jb2xvciI6IiMwYTA4MDQiLCJpY29ucyI6W119">
-<style>
-@media (max-width:900px){
-  #app{padding:12px 12px 90px !important}
-  .nav{position:fixed!important;bottom:0;left:0;right:0;z-index:90;margin:0!important;border-radius:0!important;background:#0a0804f2!important;backdrop-filter:blur(12px);padding:6px 4px!important;justify-content:space-around!important;border-top:1px solid #2e2820!important}
-  .nav-btn{flex-direction:column!important;gap:2px!important;font-size:10px!important;padding:8px 4px!important;min-width:0!important}
-  .nav-btn i{font-size:18px!important}
-  .hdr{position:sticky!important;top:0;z-index:80;background:#0a0804f2!important;backdrop-filter:blur(12px);margin:-12px -12px 12px!important;padding:12px!important}
-  #toast{bottom:90px!important}
-}
-</style>
 </head>
 <body>
 <div id="app">
@@ -382,8 +379,14 @@ tr:hover td{background:var(--surf3)}
       <button id="logoutBtn" onclick="logout()" title="Déconnexion"><i class="ri-logout-box-r-line"></i></button>
       <span id="hdrQueue" class="badge badge-amber">File: 0</span>
       <span id="hdrBase" class="badge badge-red">Base: 0</span>
+      <button id="installBtn" onclick="installPWA()" title="Installer l'application sur cet appareil" style="display:none;background:var(--amber);color:#000;border:none;border-radius:8px;padding:6px 10px;cursor:pointer;font-size:12px;font-weight:700"><i class="ri-download-cloud-2-line"></i> Installer</button>
     </div>
   </header>
+
+  <!-- ===== BANNIÈRE MISE À JOUR PWA ===== -->
+  <div id="pwaUpdateBanner" style="display:none;background:#1d4ed8;color:#fff;text-align:center;padding:8px;font-size:12px;font-weight:600;letter-spacing:.5px">
+    🔄 Nouvelle version disponible — <button onclick="applyUpdate()" style="background:#fff;color:#1d4ed8;border:none;border-radius:4px;padding:2px 10px;cursor:pointer;font-weight:700;margin-left:6px">Mettre à jour</button>
+  </div>
 
   <nav class="nav">
     <button class="nav-btn active" data-tab="saisie" onclick="switchTab('saisie')"><i class="ri-flashlight-line"></i> SAISIE</button>
@@ -392,6 +395,7 @@ tr:hover td{background:var(--surf3)}
     <button class="nav-btn" data-tab="historique" onclick="switchTab('historique')"><i class="ri-history-line"></i> HISTORIQUE</button>
     <button class="nav-btn" data-tab="templates" onclick="switchTab('templates')"><i class="ri-image-edit-line"></i> TEMPLATES</button>
     <button class="nav-btn" data-tab="config" onclick="switchTab('config')"><i class="ri-settings-3-line"></i> CONFIG</button>
+    <button class="nav-btn" onclick="openHelp()" style="margin-left:auto;color:var(--amber)"><i class="ri-question-line"></i> AIDE</button>
   </nav>
 
   <!-- ===== SAISIE ===== -->
@@ -414,7 +418,7 @@ tr:hover td{background:var(--surf3)}
         <div class="g2">
           <div class="card">
             <label class="lbl">Prix (DH)</label>
-            <input id="priceInput" type="text" inputmode="decimal" placeholder="0,00">
+            <input id="priceInput" type="text" inputmode="decimal" placeholder="0,00" oninput="onFideliteChange()">
           </div>
           <div class="card">
             <label class="lbl">Unité / affichage</label>
@@ -435,13 +439,46 @@ tr:hover td{background:var(--surf3)}
           <input id="grammageInput" type="text" inputmode="decimal" placeholder="Ex: 0.250">
           <div style="font-size:11px;color:var(--text3);margin-top:4px">Utilisé pour calculer le prix total (Prix × Grammage)</div>
         </div>
+        <!-- Fidélité -->
+        <div class="card" style="padding:12px" id="fideliteWrap">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px">
+            <label class="lbl" style="margin:0">% Fidélité <span style="color:var(--amber)">🎁</span></label>
+            <span id="fideliteCalcDisplay" style="font-family:'IBM Plex Mono',monospace;font-size:14px;font-weight:700;color:var(--amber);"></span>
+          </div>
+          <input id="fideliteInput" type="text" inputmode="decimal" placeholder="Ex: 5  → 5% du prix en points" oninput="onFideliteChange()">
+          <div id="fideliteInfo" style="font-size:11px;color:var(--text3);margin-top:5px;display:none"></div>
+        </div>
+        <!-- Couleurs textes -->
+        <div class="card" style="padding:12px">
+          <div style="font-size:12px;color:var(--text3);margin-bottom:8px;font-weight:600">COULEURS TEXTES (contraste)</div>
+          <div class="g3" style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px">
+            <div><label class="lbl" style="font-size:10px">Désignation</label><input type="color" id="colDes" value="#FFFFFF" style="width:100%;height:32px;border:none;border-radius:6px;cursor:pointer"></div>
+            <div><label class="lbl" style="font-size:10px">Prix</label><input type="color" id="colPrix" value="#8B0000" style="width:100%;height:32px;border:none;border-radius:6px;cursor:pointer"></div>
+            <div><label class="lbl" style="font-size:10px">Unité</label><input type="color" id="colUnite" value="#F5E6C8" style="width:100%;height:32px;border:none;border-radius:6px;cursor:pointer"></div>
+            <div><label class="lbl" style="font-size:10px">Ingr. FR</label><input type="color" id="colIngFr" value="#FFFFFF" style="width:100%;height:32px;border:none;border-radius:6px;cursor:pointer"></div>
+            <div><label class="lbl" style="font-size:10px">Ingr. AR</label><input type="color" id="colIngAr" value="#F5E6C8" style="width:100%;height:32px;border:none;border-radius:6px;cursor:pointer"></div>
+            <div><label class="lbl" style="font-size:10px">Allergènes</label><input type="color" id="colAllergen" value="#FF0000" style="width:100%;height:32px;border:none;border-radius:6px;cursor:pointer"></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px">
+            <button class="btn" style="flex:1;font-size:11px;padding:6px" onclick="resetTextColors()">Réinitialiser</button>
+            <button class="btn btn-amber" style="flex:1;font-size:11px;padding:6px" onclick="applyTextColors()">Appliquer</button>
+          </div>
+          <div style="border-top:1px solid var(--border);margin-top:10px;padding-top:8px">
+            <div style="font-size:10px;color:var(--text4);margin-bottom:6px">SAUVEGARDE DONNÉES (évite perte si historique vidé) — <span id="autoSaveStatus" style="color:var(--amber)">Inactif</span></div>
+            <div style="display:flex;gap:6px;margin-bottom:6px">
+              <button class="btn btn-blue" style="flex:1;font-size:10px;padding:5px" onclick="exportAllData()"><i class="ri-save-3-line"></i> Sauvegarder</button>
+              <label class="btn btn-ghost" style="flex:1;font-size:10px;padding:5px;cursor:pointer"><i class="ri-upload-cloud-2-line"></i> Restaurer<input type="file" accept=".json" style="display:none" onchange="importAllData(this)"></label>
+            </div>
+            <button class="btn" style="width:100%;font-size:10px;padding:5px" onclick="enableAutoSave()"><i class="ri-folder-open-line"></i> Activer auto-restauration (choisir dossier)</button>
+          </div>
+        </div>
         <!-- Add button -->
         <button class="btn btn-amber btn-full" onclick="addToQueue()">
           <i class="ri-add-circle-line"></i> AJOUTER À LA FILE — ENTRÉE
         </button>
         <!-- Import Excel to queue -->
         <div class="card" style="padding:12px">
-          <div style="font-size:12px;color:var(--text3);margin-bottom:8px;font-weight:600">IMPORT EXCEL → FILE (format: Code·Prix·Unité·Template·Grammage)</div>
+          <div style="font-size:12px;color:var(--text3);margin-bottom:8px;font-weight:600">IMPORT EXCEL → FILE (format: Code·Prix·Unité·Template·Grammage·%Fidélité)</div>
           <label class="drop-zone" id="dropImport">
             <i class="ri-file-excel-2-line" style="font-size:24px;display:block;margin-bottom:4px"></i>
             Déposer ou cliquer pour importer
@@ -473,14 +510,16 @@ tr:hover td{background:var(--surf3)}
         <div class="card-title" style="margin:0"><i class="ri-printer-line"></i> File d'impression</div>
         <div style="display:flex;gap:8px;flex-wrap:wrap">
           <button class="btn btn-ghost btn-sm" onclick="clearQueue()"><i class="ri-delete-bin-line"></i> Vider</button>
-          <button class="btn btn-amber" onclick="generatePDF()"><i class="ri-file-pdf-line"></i> PDF A4 (4 A7/page)</button>
+          <button class="btn btn-amber" onclick="generatePDF()"><i class="ri-file-pdf-line"></i> PDF A4</button>
+          <button class="btn btn-blue" style="background:#1d4ed8" onclick="shareByEmail()"><i class="ri-mail-send-line"></i> Email</button>
+          <button class="btn" style="background:#25D366;color:#fff;border:none" onclick="shareByWhatsApp()"><i class="ri-whatsapp-line"></i> WhatsApp</button>
         </div>
       </div>
       <div class="tbl-wrap" style="max-height:500px">
         <table>
           <thead><tr>
             <th>Code</th><th>Désignation</th><th>Template</th>
-            <th>Prix</th><th>Unité</th><th>Grammage</th><th></th>
+            <th>Prix</th><th>Unité</th><th>Grammage</th><th>Fidélité</th><th></th>
           </tr></thead>
           <tbody id="queueBody"></tbody>
         </table>
@@ -622,6 +661,167 @@ tr:hover td{background:var(--surf3)}
 <!-- Toast container -->
 <div id="toast"></div>
 
+<!-- ===== MODAL AIDE / GUIDE UTILISATEUR ===== -->
+<div id="helpModal" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,.88);z-index:9000;overflow-y:auto;padding:16px">
+  <div style="max-width:640px;margin:0 auto;background:var(--surf1);border:1px solid var(--border);border-radius:16px;overflow:hidden">
+
+    <!-- Header aide -->
+    <div style="background:linear-gradient(135deg,#1a120a 0%,#2d1f10 100%);padding:20px 20px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border)">
+      <div>
+        <div style="font-size:18px;font-weight:800;color:var(--amber);letter-spacing:.5px">📋 GUIDE UTILISATEUR</div>
+        <div style="font-size:11px;color:var(--text3);margin-top:2px">Génération A7 — Affichettes Hypermarché</div>
+      </div>
+      <button onclick="closeHelp()" style="background:var(--surf3);border:none;color:var(--text2);width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:18px">✕</button>
+    </div>
+
+    <!-- Onglets rôles -->
+    <div style="display:flex;border-bottom:1px solid var(--border);background:var(--surf2)">
+      <button class="help-role-btn active" onclick="showHelpRole('operateur',this)" style="flex:1;padding:10px 6px;font-size:11px;font-weight:700;border:none;background:transparent;color:var(--amber);cursor:pointer;border-bottom:2px solid var(--amber);letter-spacing:.5px">👤 OPÉRATEUR</button>
+      <button class="help-role-btn" onclick="showHelpRole('chef',this)" style="flex:1;padding:10px 6px;font-size:11px;font-weight:700;border:none;background:transparent;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.5px">👥 CHEF RAYON</button>
+      <button class="help-role-btn" onclick="showHelpRole('admin',this)" style="flex:1;padding:10px 6px;font-size:11px;font-weight:700;border:none;background:transparent;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.5px">🔑 ADMIN</button>
+      <button class="help-role-btn" onclick="showHelpRole('pwa',this)" style="flex:1;padding:10px 6px;font-size:11px;font-weight:700;border:none;background:transparent;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.5px">📱 APPLI</button>
+      <button class="help-role-btn" onclick="showHelpRole('apropos',this)" style="flex:1;padding:10px 6px;font-size:11px;font-weight:700;border:none;background:transparent;color:var(--text3);cursor:pointer;border-bottom:2px solid transparent;letter-spacing:.5px">ℹ️ À PROPOS</button>
+    </div>
+
+    <!-- Contenu rôle : Opérateur -->
+    <div id="help-operateur" class="help-role-content" style="padding:16px;display:block">
+      <div style="color:var(--amber);font-weight:700;font-size:13px;margin-bottom:12px">🚀 Créer une affichette rapidement</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="help-step"><span class="help-num">1</span><div><strong>Scanner ou saisir le code produit</strong><br><span style="color:var(--text3);font-size:12px">Utilisez le bouton 📷 pour scanner le code-barres ou tapez manuellement. Le produit est chargé automatiquement si la BASE est renseignée.</span></div></div>
+        <div class="help-step"><span class="help-num">2</span><div><strong>Vérifier les informations</strong><br><span style="color:var(--text3);font-size:12px">Désignation FR/AR, prix, promotion, grammage. Corrigez si nécessaire. La prévisualisation A7 se met à jour en temps réel.</span></div></div>
+        <div class="help-step"><span class="help-num">3</span><div><strong>Choisir le template</strong><br><span style="color:var(--text3);font-size:12px">Sélectionnez le gabarit adapté (prix choc, promo, nouveauté…). L'aperçu reflète immédiatement votre choix.</span></div></div>
+        <div class="help-step"><span class="help-num">4</span><div><strong>Ajouter à la file d'impression</strong><br><span style="color:var(--text3);font-size:12px">Cliquez <em>Ajouter à la file</em>. Accumulez plusieurs affichettes, puis imprimez-les toutes en PDF depuis l'onglet FILE.</span></div></div>
+      </div>
+      <div style="margin-top:14px;background:var(--surf2);border-radius:8px;padding:12px;font-size:12px">
+        <div style="color:var(--amber);font-weight:700;margin-bottom:6px">⌨️ Raccourcis clavier</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px;color:var(--text2)">
+          <span><kbd style="background:var(--surf3);padding:1px 5px;border-radius:3px;font-size:10px">Entrée</kbd> Valider le code</span>
+          <span><kbd style="background:var(--surf3);padding:1px 5px;border-radius:3px;font-size:10px">F5</kbd> Rafraîchir l'aperçu</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Contenu rôle : Chef de Rayon -->
+    <div id="help-chef" class="help-role-content" style="padding:16px;display:none">
+      <div style="color:var(--amber);font-weight:700;font-size:13px;margin-bottom:12px">📦 Gérer la base produits & templates</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="help-step"><span class="help-num">▶</span><div><strong>Onglet BASE</strong><br><span style="color:var(--text3);font-size:12px">Consultez, ajoutez, modifiez et supprimez des produits. Importez depuis un fichier CSV ou Excel. Exportez la base complète.</span></div></div>
+        <div class="help-step"><span class="help-num">▶</span><div><strong>Onglet TEMPLATES</strong><br><span style="color:var(--text3);font-size:12px">Créez et personnalisez vos gabarits d'affichettes : couleurs, polices, zones, logos rayon. Chaque template peut être dupliqué et renommé.</span></div></div>
+        <div class="help-step"><span class="help-num">▶</span><div><strong>Onglet HISTORIQUE</strong><br><span style="color:var(--text3);font-size:12px">Retrouvez toutes les affichettes générées, filtrez par date, opérateur, code produit. Régénérez rapidement une affichette passée.</span></div></div>
+        <div class="help-step"><span class="help-num">▶</span><div><strong>Onglet CONFIG → Mapping</strong><br><span style="color:var(--text3);font-size:12px">Associez les colonnes de votre fichier d'import aux champs de l'application (code, prix, désignation…).</span></div></div>
+      </div>
+      <div style="margin-top:14px;background:#1a2e1a;border:1px solid #2d4a2d;border-radius:8px;padding:10px;font-size:12px;color:#7dc47d">
+        <strong>💡 Conseil :</strong> Préparez un fichier CSV avec les colonnes : <code>code, designation_fr, designation_ar, prix, promo</code>. L'import batch est le moyen le plus rapide de peupler la base.
+      </div>
+    </div>
+
+    <!-- Contenu rôle : Admin -->
+    <div id="help-admin" class="help-role-content" style="padding:16px;display:none">
+      <div style="color:var(--amber);font-weight:700;font-size:13px;margin-bottom:12px">🔐 Administration & sécurité</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="help-step"><span class="help-num">▶</span><div><strong>Gestion des utilisateurs</strong><br><span style="color:var(--text3);font-size:12px">Bouton <em>Admin</em> dans le header → créez des comptes, définissez les rôles et permissions par onglet. Le mot de passe est hashé (FNV-1a).</span></div></div>
+        <div class="help-step"><span class="help-num">▶</span><div><strong>Compte administrateur par défaut</strong><br><span style="color:var(--text3);font-size:12px">Login : <code>admin</code> / Mot de passe : <code>admin123</code>. Changez-le dès la première connexion en production.</span></div></div>
+        <div class="help-step"><span class="help-num">▶</span><div><strong>Sauvegarde des données</strong><br><span style="color:var(--text3);font-size:12px">Toutes les données (base, file, historique, templates) sont stockées dans le <em>localStorage</em> du navigateur. Exportez régulièrement via CONFIG → Export.</span></div></div>
+        <div class="help-step"><span class="help-num">▶</span><div><strong>Réinitialisation</strong><br><span style="color:var(--text3);font-size:12px">En cas de problème d'authentification, la page de connexion propose un lien de réinitialisation. Cette action efface tous les comptes.</span></div></div>
+      </div>
+      <div style="margin-top:14px;background:#2e1a1a;border:1px solid #4a2d2d;border-radius:8px;padding:10px;font-size:12px;color:#e07d7d">
+        <strong>⚠️ Important :</strong> Les données sont locales au navigateur de chaque poste. Pour partager la base entre plusieurs postes, utilisez l'export/import JSON ou configurez un serveur partagé.
+      </div>
+    </div>
+
+    <!-- Contenu : Application PWA -->
+    <div id="help-pwa" class="help-role-content" style="padding:16px;display:none">
+      <div style="color:var(--amber);font-weight:700;font-size:13px;margin-bottom:12px">📱 Utiliser comme application installée</div>
+      <div style="display:flex;flex-direction:column;gap:10px">
+        <div class="help-step"><span class="help-num">📲</span><div><strong>Installation sur Android (Chrome)</strong><br><span style="color:var(--text3);font-size:12px">Cliquez le bouton <em>Installer</em> dans le header, ou menu Chrome ⋮ → <em>Ajouter à l'écran d'accueil</em>. L'app s'ouvre en plein écran sans barre de navigateur.</span></div></div>
+        <div class="help-step"><span class="help-num">🍎</span><div><strong>Installation sur iOS (Safari)</strong><br><span style="color:var(--text3);font-size:12px">Appuyez sur le bouton <em>Partager</em> ↑ puis <em>Sur l'écran d'accueil</em>. L'app est ajoutée comme une vraie application.</span></div></div>
+        <div class="help-step"><span class="help-num">🖥️</span><div><strong>Installation sur PC (Chrome/Edge)</strong><br><span style="color:var(--text3);font-size:12px">Cliquez le bouton <em>Installer</em> ou l'icône ⊕ dans la barre d'adresse. L'app s'ouvre dans sa propre fenêtre.</span></div></div>
+        <div class="help-step"><span class="help-num">📶</span><div><strong>Mode hors ligne</strong><br><span style="color:var(--text3);font-size:12px">Une fois installée, l'application fonctionne sans connexion internet. La base, les templates et l'historique restent accessibles.</span></div></div>
+        <div class="help-step"><span class="help-num">🔄</span><div><strong>Mises à jour</strong><br><span style="color:var(--text3);font-size:12px">Une bannière apparaît en haut de l'écran lorsqu'une nouvelle version est disponible. Cliquez <em>Mettre à jour</em> pour l'appliquer.</span></div></div>
+      </div>
+      <div style="margin-top:14px;background:var(--surf2);border-radius:8px;padding:12px;font-size:12px;text-align:center">
+        <div style="color:var(--text3);margin-bottom:8px">Statut du service worker :</div>
+        <div id="swStatus" style="color:var(--amber);font-weight:700">Vérification…</div>
+      </div>
+    </div>
+
+    <!-- Contenu : À PROPOS -->
+    <div id="help-apropos" class="help-role-content" style="padding:20px;display:none">
+      <!-- Badge identité -->
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="display:inline-flex;align-items:center;justify-content:center;width:72px;height:72px;border-radius:18px;background:linear-gradient(135deg,#004497 0%,#0066cc 60%,#e8002a 100%);box-shadow:0 6px 24px rgba(0,68,151,0.45);margin-bottom:12px">
+          <span style="font-size:30px;font-weight:900;color:#fff;letter-spacing:-2px;font-family:monospace">A7</span>
+        </div>
+        <div style="font-size:22px;font-weight:900;color:var(--amber);letter-spacing:1px;font-family:monospace">A7 <span style="color:#fff">v2.1</span></div>
+        <div style="font-size:12px;color:var(--text3);margin-top:4px;letter-spacing:2px;text-transform:uppercase">Génération Affichettes A7 · PWA</div>
+      </div>
+
+      <!-- Carte développeur -->
+      <div style="background:linear-gradient(135deg,#0d1829 0%,#0a1f3d 100%);border:1px solid rgba(0,137,255,0.3);border-radius:12px;padding:16px 18px;margin-bottom:14px;position:relative;overflow:hidden">
+        <div style="position:absolute;top:0;right:0;width:80px;height:80px;background:radial-gradient(circle,rgba(0,137,255,0.12) 0%,transparent 70%);border-radius:0 12px 0 0"></div>
+        <div style="font-size:10px;letter-spacing:2px;text-transform:uppercase;color:rgba(0,137,255,0.7);margin-bottom:8px">👨‍💻 Développé par</div>
+        <div style="font-size:20px;font-weight:800;color:#fff;letter-spacing:0.5px">Mohamed <span style="color:#f59e0b">TARABET</span></div>
+        <div style="margin-top:12px;display:flex;flex-direction:column;gap:6px">
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+            <span style="color:rgba(0,137,255,0.6);font-size:14px">🏪</span>
+            <span style="color:var(--text2)">Service <strong style="color:#fff">Décoration</strong></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+            <span style="color:rgba(0,137,255,0.6);font-size:14px">📍</span>
+            <span style="color:var(--text2)"><strong style="color:#fff">Marjane Tanger 08</strong></span>
+          </div>
+          <div style="display:flex;align-items:center;gap:8px;font-size:12px">
+            <span style="color:rgba(0,137,255,0.6);font-size:14px">📅</span>
+            <span style="color:var(--text2)">Mai <strong style="color:#fff">2026</strong></span>
+          </div>
+        </div>
+        <!-- Signature -->
+        <div style="position:absolute;bottom:10px;right:14px;font-family:monospace;font-size:10px;color:rgba(245,158,11,0.4);letter-spacing:1px">MTARABET</div>
+      </div>
+
+      <!-- Changelog -->
+      <div style="background:var(--surf2);border-radius:10px;padding:14px;margin-bottom:14px">
+        <div style="font-size:11px;font-weight:700;color:var(--amber);letter-spacing:1px;margin-bottom:10px">📋 CHANGELOG</div>
+        <div style="display:flex;flex-direction:column;gap:7px">
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <span style="background:var(--amber);color:#000;font-size:9px;font-weight:800;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0">v2.1</span>
+            <span style="font-size:12px;color:var(--text2)">Fidélité % — calcul auto, Rectangle 11, coordonnées POTX exactes</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <span style="background:var(--surf3);color:var(--text3);font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0">v2.0</span>
+            <span style="font-size:12px;color:var(--text3)">PWA multi-utilisateur, scan code-barres, templates POTX A7_AVRIL2026</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:flex-start">
+            <span style="background:var(--surf3);color:var(--text3);font-size:9px;font-weight:700;padding:2px 7px;border-radius:10px;white-space:nowrap;flex-shrink:0">v1.0</span>
+            <span style="font-size:12px;color:var(--text3)">Application Excel VBA originale — génération PPTX</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Stack technique -->
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:center">
+        <span style="background:rgba(245,158,11,0.1);border:1px solid rgba(245,158,11,0.25);color:var(--amber);font-size:10px;padding:3px 10px;border-radius:20px;letter-spacing:0.5px">PWA · Service Worker</span>
+        <span style="background:rgba(0,137,255,0.1);border:1px solid rgba(0,137,255,0.25);color:#60a5fa;font-size:10px;padding:3px 10px;border-radius:20px;letter-spacing:0.5px">Canvas API</span>
+        <span style="background:rgba(34,197,94,0.1);border:1px solid rgba(34,197,94,0.25);color:#4ade80;font-size:10px;padding:3px 10px;border-radius:20px;letter-spacing:0.5px">jsPDF · SheetJS</span>
+        <span style="background:rgba(168,85,247,0.1);border:1px solid rgba(168,85,247,0.25);color:#c084fc;font-size:10px;padding:3px 10px;border-radius:20px;letter-spacing:0.5px">Vanilla JS</span>
+        <span style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.25);color:#f87171;font-size:10px;padding:3px 10px;border-radius:20px;letter-spacing:0.5px">POTX A7_AVRIL2026</span>
+      </div>
+    </div>
+
+    <!-- Footer aide -->
+    <div style="border-top:1px solid var(--border);padding:12px 16px;display:flex;justify-content:space-between;align-items:center;background:var(--surf2)">
+      <div style="font-size:11px;color:var(--text4)">A7 v2.1 · MTARABET · Marjane Tanger 08 · Mai 2026</div>
+      <button onclick="closeHelp()" style="background:var(--amber);color:#000;border:none;border-radius:8px;padding:8px 16px;cursor:pointer;font-weight:700;font-size:12px">Fermer</button>
+    </div>
+  </div>
+</div>
+
+<style>
+.help-step { display:flex;gap:12px;align-items:flex-start;background:var(--surf2);border-radius:8px;padding:10px;font-size:13px; }
+.help-num { min-width:26px;height:26px;background:var(--amber);color:#000;border-radius:50%;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:12px;flex-shrink:0; }
+.help-role-btn.active { color:var(--amber) !important; border-bottom:2px solid var(--amber) !important; }
+</style>
+
 <!-- ===== LOGIN OVERLAY ===== -->
 <div id="loginOverlay">
   <div class="login-box">
@@ -638,6 +838,45 @@ tr:hover td{background:var(--surf3)}
     </div>
     <button class="btn btn-amber btn-full" onclick="doLogin()"><i class="ri-login-box-line"></i> Se connecter</button>
     <div id="loginErr" class="login-err"></div>
+    <div style="margin-top:14px;border-top:1px solid var(--border);padding-top:10px">
+      <details style="font-size:11px">
+        <summary style="cursor:pointer;color:var(--text3);user-select:none">⚠️ Problème de connexion ?</summary>
+        <div style="margin-top:8px;display:flex;flex-direction:column;gap:6px">
+          <button class="btn" style="font-size:11px;padding:6px 10px;background:var(--surf2);width:100%" onclick="debugLogin()">
+            🔍 Diagnostiquer le compte
+          </button>
+          <button class="btn" style="font-size:11px;padding:6px 10px;background:#7f1d1d;color:#fca5a5;width:100%" onclick="resetAuth()">
+            🔄 Réinitialiser comptes (données conservées)
+          </button>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ===== CHANGE PASSWORD MODAL ===== -->
+<div class="modal-bg" id="changePasswordModal">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-title"><i class="ri-lock-password-line" style="color:var(--amber)"></i> Modifier le mot de passe</div>
+    <button class="modal-close" onclick="closeChangePassword()"><i class="ri-close-line"></i></button>
+    <div id="cpwUserInfo" style="background:var(--surf3);border-radius:8px;padding:10px 14px;margin-bottom:16px;font-size:13px;color:var(--text2)"></div>
+    <div class="field">
+      <label class="lbl">Mot de passe actuel</label>
+      <input id="cpw_old" type="password" autocomplete="current-password" placeholder="Mot de passe actuel">
+    </div>
+    <div class="field">
+      <label class="lbl">Nouveau mot de passe</label>
+      <input id="cpw_new" type="password" autocomplete="new-password" placeholder="Nouveau mot de passe (min. 4 caractères)">
+    </div>
+    <div class="field">
+      <label class="lbl">Confirmer le nouveau mot de passe</label>
+      <input id="cpw_confirm" type="password" autocomplete="new-password" placeholder="Retaper le nouveau mot de passe">
+    </div>
+    <div id="cpwErr" style="color:#ff6b6b;font-size:12px;margin-bottom:10px;display:none"></div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:8px">
+      <button class="btn btn-ghost" onclick="closeChangePassword()">Annuler</button>
+      <button class="btn btn-amber" onclick="doChangePassword()"><i class="ri-save-line"></i> Enregistrer</button>
+    </div>
   </div>
 </div>
 
@@ -691,33 +930,125 @@ function saveUsers(users){
 }
 
 function initDefaultAdmin(){
-  const users = getUsers();
-  if(!users.find(u=>u.username==='admin')){
-    users.unshift({username:'admin',pwHash:fnv1a('admin123'),role:'admin',permissions:ALL_TABS});
+  try {
+    let users = getUsers();
+    // Nettoyer les entrées corrompues (sans username ou pwHash)
+    users = users.filter(u => u && typeof u.username === 'string' && typeof u.pwHash === 'string');
+    const adminExists = users.find(u => u.username.toLowerCase() === 'admin');
+    if(!adminExists){
+      users.unshift({username:'admin', pwHash:fnv1a('admin123'), role:'admin', permissions:ALL_TABS});
+    } else {
+      // S'assurer que l'admin a toujours le rôle admin et toutes les permissions
+      const idx = users.indexOf(adminExists);
+      users[idx].role = 'admin';
+      users[idx].permissions = ALL_TABS;
+    }
     saveUsers(users);
-  }
+  } catch(e){ console.error('initDefaultAdmin error:', e); }
 }
 
 function getCurrentSession(){
-  try{ return JSON.parse(sessionStorage.getItem('a7_session')||'null'); } catch(e){ return null; }
+  try {
+    const raw = localStorage.getItem('a7_session');
+    if(!raw) return null;
+    const data = JSON.parse(raw);
+    if(!data || !data.username) { localStorage.removeItem('a7_session'); return null; }
+    // Expiration 30 jours
+    if(data._exp && Date.now() > data._exp){ localStorage.removeItem('a7_session'); return null; }
+    // Vérifier que l'utilisateur existe encore dans la base
+    const users = getUsers();
+    const still = users.find(u => u.username.toLowerCase() === data.username.toLowerCase());
+    if(!still){ localStorage.removeItem('a7_session'); return null; }
+    // Retourner les données fraîches de l'utilisateur (permissions à jour)
+    return { username: still.username, role: still.role, permissions: still.permissions, _exp: data._exp };
+  } catch(e){ localStorage.removeItem('a7_session'); return null; }
 }
 
 function doLogin(){
-  const username = ($('#loginUser').value||'').trim().toLowerCase();
-  const pass = $('#loginPass').value;
-  if(!username||!pass){ $('#loginErr').textContent='Identifiant et mot de passe requis.'; return; }
-  const users = getUsers();
-  const user = users.find(u=>u.username.toLowerCase()===username && u.pwHash===fnv1a(pass));
-  if(!user){ $('#loginErr').textContent='Identifiant ou mot de passe incorrect.'; return; }
-  sessionStorage.setItem('a7_session', JSON.stringify({username:user.username,role:user.role,permissions:user.permissions}));
-  $('#loginOverlay').style.display='none';
-  applySession(user);
+  try {
+    $('#loginErr').textContent = '';
+    const username = ($('#loginUser').value||'').trim().toLowerCase();
+    const pass = $('#loginPass').value;
+    if(!username || !pass){
+      $('#loginErr').textContent = 'Identifiant et mot de passe requis.';
+      return;
+    }
+    let users = getUsers();
+    // Nettoyer les données corrompues avant de chercher
+    users = users.filter(u => u && typeof u.username === 'string' && typeof u.pwHash === 'string');
+    const hash = fnv1a(pass);
+    const user = users.find(u => u.username.toLowerCase() === username && u.pwHash === hash);
+    if(!user){
+      $('#loginErr').textContent = 'Identifiant ou mot de passe incorrect.';
+      return;
+    }
+    const sessionData = {
+      username: user.username,
+      role: user.role,
+      permissions: user.permissions,
+      _exp: Date.now() + 30 * 24 * 60 * 60 * 1000
+    };
+    localStorage.setItem('a7_session', JSON.stringify(sessionData));
+    $('#loginOverlay').style.display = 'none';
+    $('#app').style.display = '';
+    applySession(user);
+    setTimeout(loadTextColorsUI, 200);
+  } catch(e) {
+    console.error('Login error:', e);
+    $('#loginErr').textContent = 'Erreur technique. Rechargez la page.';
+  }
 }
 
 function logout(){
-  sessionStorage.removeItem('a7_session');
+  localStorage.removeItem('a7_session');
   location.reload();
 }
+function debugLogin(){
+  try {
+    const username = ($('#loginUser').value||'').trim().toLowerCase();
+    const pass = $('#loginPass').value;
+    const users = getUsers();
+    let msg = '';
+
+    msg += `👥 Comptes trouvés : ${users.length}\n`;
+    users.forEach((u,i) => {
+      msg += `  [${i+1}] "${u.username}" — rôle: ${u.role||'?'} — hash: ${u.pwHash?u.pwHash.substring(0,8)+'...':'MANQUANT'}\n`;
+    });
+
+    if(username){
+      const found = users.find(u => u.username.toLowerCase() === username);
+      if(!found){
+        msg += `\n❌ Utilisateur "${username}" introuvable.`;
+      } else {
+        msg += `\n✓ Utilisateur "${username}" trouvé.`;
+        if(pass){
+          const hash = fnv1a(pass);
+          msg += `\n  Hash saisi     : ${hash.substring(0,8)}...`;
+          msg += `\n  Hash enregistré: ${found.pwHash?found.pwHash.substring(0,8):'VIDE'}...`;
+          msg += hash === found.pwHash ? '\n  ✅ Mot de passe CORRECT' : '\n  ❌ Mot de passe INCORRECT';
+        }
+      }
+    } else {
+      msg += '\n→ Saisissez votre identifiant pour analyser.';
+    }
+
+    alert(msg);
+  } catch(e) {
+    alert('Erreur diagnostic : ' + e.message);
+  }
+}
+
+function resetAuth(){
+  if(!confirm('Réinitialiser tous les comptes ?\nLe compte admin (admin123) sera recréé.\nVos données (articles, templates) sont conservées.')) return;
+  localStorage.removeItem('a7_users');
+  localStorage.removeItem('a7_session');
+  // Recréer admin proprement
+  const users = [{username:'admin', pwHash:fnv1a('admin123'), role:'admin', permissions:ALL_TABS}];
+  localStorage.setItem('a7_users', JSON.stringify(users));
+  alert('✅ Comptes réinitialisés.\nIdentifiant : admin\nMot de passe : admin123');
+  location.reload();
+}
+
 
 function applySession(user){
   // Show header info
@@ -764,8 +1095,8 @@ function renderUserList(){
           ${isAdmin?'<span class="badge-admin">ADMIN</span>':''}
         </div>
         <div style="display:flex;gap:6px">
-          ${!isAdmin?`<button class="btn btn-ghost btn-sm" onclick="resetUserPass(${i})"><i class="ri-key-2-line"></i></button>
-          <button class="btn btn-red btn-sm" onclick="deleteUser(${i})"><i class="ri-delete-bin-line"></i></button>`:''}
+          <button class="btn btn-ghost btn-sm" onclick="openChangePassword(${i})" title="Changer le mot de passe"><i class="ri-key-2-line"></i></button>
+          ${!isAdmin?`<button class="btn btn-red btn-sm" onclick="deleteUser(${i})"><i class="ri-delete-bin-line"></i></button>`:''}
         </div>
       </div>
       <div style="display:flex;flex-wrap:wrap;gap:4px">${permsHtml}</div>
@@ -806,6 +1137,52 @@ function resetUserPass(i){
   toast('Mot de passe modifié','ok');
 }
 
+// ── Changement de mot de passe sécurisé ──────────────────────
+let _cpwTargetIdx = -1;
+
+function openChangePassword(userIdx){
+  _cpwTargetIdx = userIdx;
+  const users = getUsers();
+  const u = users[userIdx];
+  $('#cpwUserInfo').innerHTML = `<i class="ri-user-line"></i> <strong>${u.username}</strong>${u.role==='admin'?' &nbsp;<span style="background:var(--amber3);color:var(--amber);padding:2px 8px;border-radius:10px;font-size:10px;font-weight:700">ADMIN</span>':''}`;
+  $('#cpw_old').value = '';
+  $('#cpw_new').value = '';
+  $('#cpw_confirm').value = '';
+  $('#cpwErr').style.display = 'none';
+  $('#changePasswordModal').classList.add('open');
+  setTimeout(()=>$('#cpw_old').focus(), 200);
+}
+
+function closeChangePassword(){
+  $('#changePasswordModal').classList.remove('open');
+  _cpwTargetIdx = -1;
+}
+
+function doChangePassword(){
+  const errEl = $('#cpwErr');
+  const oldVal = $('#cpw_old').value;
+  const newVal = $('#cpw_new').value.trim();
+  const confVal = $('#cpw_confirm').value.trim();
+  errEl.style.display = 'none';
+
+  const show = (msg) => { errEl.textContent = msg; errEl.style.display = 'block'; };
+
+  if(!oldVal)    return show('⚠️ Saisissez le mot de passe actuel.');
+  if(!newVal)    return show('⚠️ Saisissez un nouveau mot de passe.');
+  if(newVal.length < 4) return show('⚠️ Le nouveau mot de passe doit contenir au moins 4 caractères.');
+  if(newVal !== confVal) return show('⚠️ Les deux mots de passe ne correspondent pas.');
+
+  const users = getUsers();
+  const u = users[_cpwTargetIdx];
+  if(fnv1a(oldVal) !== u.pwHash) return show('❌ Mot de passe actuel incorrect.');
+
+  users[_cpwTargetIdx].pwHash = fnv1a(newVal);
+  saveUsers(users);
+  closeChangePassword();
+  toast('✅ Mot de passe modifié avec succès', 'ok');
+  renderUserList();
+}
+
 function addNewUser(){
   const name = ($('#nu_name').value||'').trim().toLowerCase();
   const pass = $('#nu_pass').value;
@@ -828,9 +1205,9 @@ document.addEventListener('DOMContentLoaded',()=>{
 // ═══════════════════════════════════════════════════════════════
 // CONSTANTS
 // ═══════════════════════════════════════════════════════════════
-const TEMPLATES_ALL = ['PAT','PAT_M','BOUL','B_AGN','B_FIL','B_FIL_MN','B_BCK','B_VOL','B_VOL-MN','CHARC','TRAIT','CHARC_CAN','FROM'];
-const SPECIAL_TPL = ['B_FIL','B_FIL_MN','CHARC_CAN']; // prix × grammage
-const NO_ING_TPL  = ['B_VOL','B_VOL-MN','CHARC','TRAIT'];
+const TEMPLATES_ALL = ['PAT','PAT_M','BOUL','B_AGN','B_FIL','B_FIL_MN','B_BCK','B_VOL','B_VOL-MN','FROM','TRAIT','FROM_CAN','GLACE'];
+const SPECIAL_TPL = ['B_FIL','B_FIL_MN','FROM_CAN']; // slides avec zone fidélité (Rectangle 11)
+const NO_ING_TPL  = []; // Affichage ingrédients activé pour tous les templates
 
 // Template colors for canvas when no image uploaded
 const TPL_COLORS = {
@@ -859,6 +1236,27 @@ const ALLERGEN_GROUPS = [
 ];
 const ALLERGEN_FLAT = ALLERGEN_GROUPS.flat();
 
+// Arabic allergen keywords (14 EU allergen groups)
+const ALLERGEN_FLAT_AR = [
+  'الغلوتين','قمح','شعير','شوفان','جاودار',
+  'قشريات','جمبري','كراب','سلطعون',
+  'سمك','سلمون','تونة','تونا','أنشوجة',
+  'بيض','بيضة',
+  'حليب','لبن','جبن','جبنة','كريمة','زبدة','لاكتوز',
+  'فول سوداني','فستق سوداني',
+  'صويا','فول الصويا','سويا',
+  'مكسرات','لوز','جوز','بندق','كاجو','فستق',
+  'كرفس','خردل','سمسم','طحينة','طحينية',
+  'كبريتيت','سلفيت','ترمس','لوبيا',
+  'رخويات','حبار','أخطبوط','محار'
+];
+
+function isAllergenAr(word) {
+  const w = word.trim();
+  if (!w) return false;
+  return ALLERGEN_FLAT_AR.some(a => w === a || w.includes(a) || a.includes(w));
+}
+
 const DEFAULT_MAPPING = [
   {prefix:'2658',template:'FROM',label:'Fromages affinés'},
   {prefix:'265', template:'FROM',label:'Fromages'},
@@ -872,6 +1270,146 @@ const DEFAULT_MAPPING = [
   {prefix:'262', template:'B_AGN',label:'Boucherie Agneau'},
 ];
 
+
+// ═══════════════════════════════════════════════════════════════
+// LAYOUT PAR DÉFAUT — valeurs extraites du POTX A7_AVRIL2026
+// Slide 74×105mm · Toutes coordonnées en fraction du canvas (0..1)
+// Sources: Rectangle 6=DesigFR, 7=DesigAR, 9=Prix, 10=Unité,
+//          3=Allergènes, 4=Ingrédients, 11=Fidélité (slides 5,6,12)
+// ═══════════════════════════════════════════════════════════════
+const DEFAULT_TPL_LAYOUT = {
+  PAT: {
+    yDesFR:0.2198, yDesAR:0.3190, fzDesFR:28, fzDesAR:20,
+    priceY:0.4008, uniteX:0.97, uniteY:0.4008, fzUnite:16,
+    ingY:0.7499,   ingBoxW:214, ingBoxH:46, ingBoxX:3,
+    ingArY:0.7881, ingArBoxH:44,
+    fzIngFR:8, fzIngAR:7,
+    fzPrixInt:52, fzPrixDec:16,
+    allergyY:0.7261
+  },
+  PAT_M: {
+    yDesFR:0.2198, yDesAR:0.3190, fzDesFR:28, fzDesAR:20,
+    priceY:0.4008, uniteX:0.97, uniteY:0.4008, fzUnite:16,
+    ingY:0.7466,   ingBoxW:214, ingBoxH:46, ingBoxX:3,
+    ingArY:0.7829, ingArBoxH:44,
+    fzIngFR:8, fzIngAR:7,
+    fzPrixInt:52, fzPrixDec:16,
+    allergyY:0.7181
+  },
+  BOUL: {
+    yDesFR:0.2198, yDesAR:0.3190, fzDesFR:28, fzDesAR:20,
+    priceY:0.4008, uniteX:0.97, uniteY:0.4008, fzUnite:16,
+    ingY:0.7532,   ingBoxW:214, ingBoxH:46, ingBoxX:3,
+    ingArY:0.7881, ingArBoxH:44,
+    fzIngFR:8, fzIngAR:7,
+    fzPrixInt:52, fzPrixDec:16,
+    allergyY:0.7261
+  },
+  B_AGN: {
+    yDesFR:0.2822, yDesAR:0.3814, fzDesFR:28, fzDesAR:20,
+    priceY:0.5502, uniteX:0.97, uniteY:0.5502, fzUnite:16,
+    ingY:0.8606,   ingBoxW:196, ingBoxH:40, ingBoxX:10,
+    ingArY:0.9176, ingArBoxH:38,
+    fzIngFR:8, fzIngAR:7,
+    fzPrixInt:52, fzPrixDec:16,
+    allergyY:0.8606
+  },
+  B_FIL: {
+    yDesFR:0.2629, yDesAR:0.3814, fzDesFR:26, fzDesAR:18,
+    priceY:0.5346, uniteX:0.57, uniteY:0.5346, fzUnite:14,
+    ingY:0.8579,   ingBoxW:196, ingBoxH:40, ingBoxX:10,
+    ingArY:0.9283, ingArBoxH:38,
+    fzIngFR:8, fzIngAR:7,
+    fzPrixInt:40, fzPrixDec:12,
+    allergyY:0.8579,
+    // Fidélité — Rectangle 11
+    fidX:0.5960, fidY:0.5346, fidW:0.3767, fidH:0.2917,
+    fzFidInt:24, fzFidDec:10,
+    // Labels arabes fidélité
+    fidLabelArabicY:0.7191, fidRbhY:0.5785
+  },
+  B_FIL_MN: {
+    yDesFR:0.1996, yDesAR:0.3002, fzDesFR:26, fzDesAR:18,
+    priceY:0.4008, uniteX:0.55, uniteY:0.4008, fzUnite:13,
+    ingY:0.7675,   ingBoxW:214, ingBoxH:44, ingBoxX:3,
+    ingArY:0.8161, ingArBoxH:42,
+    fzIngFR:8, fzIngAR:7,
+    fzPrixInt:40, fzPrixDec:12,
+    allergyY:0.7261,
+    // Fidélité — Rectangle 11
+    fidX:0.6024, fidY:0.4008, fidW:0.3546, fidH:0.2917,
+    fzFidInt:24, fzFidDec:10,
+    fidLabelArabicY:0.5860, fidRbhY:0.4255
+  },
+  B_BCK: {
+    yDesFR:0.2607, yDesAR:0.3629, fzDesFR:28, fzDesAR:20,
+    priceY:0.5215, uniteX:0.97, uniteY:0.5215, fzUnite:16,
+    ingY:0.8740,   ingBoxW:196, ingBoxH:40, ingBoxX:10,
+    ingArY:0.9430, ingArBoxH:38,
+    fzIngFR:8, fzIngAR:7,
+    fzPrixInt:52, fzPrixDec:16,
+    allergyY:0.8740
+  },
+  B_VOL: {
+    yDesFR:0.2685, yDesAR:0.3649, fzDesFR:28, fzDesAR:20,
+    priceY:0.5038, uniteX:0.97, uniteY:0.5052, fzUnite:16,
+    ingY:0.8220,   ingBoxW:196, ingBoxH:40, ingBoxX:10,
+    ingArY:0.9114, ingArBoxH:38,
+    fzIngFR:8, fzIngAR:7,
+    fzPrixInt:52, fzPrixDec:16,
+    allergyY:0.8220
+  },
+  'B_VOL-MN': {
+    yDesFR:0.2314, yDesAR:0.3190, fzDesFR:28, fzDesAR:20,
+    priceY:0.4008, uniteX:0.97, uniteY:0.4008, fzUnite:16,
+    ingY:0.7546,   ingBoxW:214, ingBoxH:46, ingBoxX:3,
+    ingArY:0.7921, ingArBoxH:44,
+    fzIngFR:8, fzIngAR:7,
+    fzPrixInt:52, fzPrixDec:16,
+    allergyY:0.7261
+  },
+  FROM: {
+    yDesFR:0.2628, yDesAR:0.3549, fzDesFR:28, fzDesAR:20,
+    priceY:0.4852, uniteX:0.97, uniteY:0.4838, fzUnite:16,
+    ingY:0.8420,   ingBoxW:196, ingBoxH:40, ingBoxX:10,
+    ingArY:0.9430, ingArBoxH:38,
+    fzIngFR:8, fzIngAR:7,
+    fzPrixInt:52, fzPrixDec:16,
+    allergyY:0.8420
+  },
+  TRAIT: {
+    yDesFR:0.2198, yDesAR:0.3190, fzDesFR:28, fzDesAR:20,
+    priceY:0.4008, uniteX:0.97, uniteY:0.4008, fzUnite:16,
+    ingY:0.7507,   ingBoxW:214, ingBoxH:46, ingBoxX:3,
+    ingArY:0.7917, ingArBoxH:44,
+    fzIngFR:8, fzIngAR:7,
+    fzPrixInt:52, fzPrixDec:16,
+    allergyY:0.7261
+  },
+  FROM_CAN: {
+    yDesFR:0.2556, yDesAR:0.3348, fzDesFR:26, fzDesAR:18,
+    priceY:0.4752, uniteX:0.56, uniteY:0.4752, fzUnite:13,
+    ingY:0.8606,   ingBoxW:196, ingBoxH:40, ingBoxX:10,
+    ingArY:0.9257, ingArBoxH:38,
+    fzIngFR:8, fzIngAR:7,
+    fzPrixInt:40, fzPrixDec:12,
+    allergyY:0.8606,
+    // Fidélité — Rectangle 11
+    fidX:0.5963, fidY:0.4752, fidW:0.3882, fidH:0.2917,
+    fzFidInt:24, fzFidDec:10,
+    fidLabelArabicY:0.6973, fidRbhY:0.5057
+  },
+  GLACE: {
+    yDesFR:0.3082, yDesAR:0.4132, fzDesFR:28, fzDesAR:20,
+    priceY:0.6495, uniteX:0.97, uniteY:0.6489, fzUnite:16,
+    ingY:0.75,     ingBoxW:214, ingBoxH:46, ingBoxX:3,
+    ingArY:0.80,   ingArBoxH:44,
+    fzIngFR:8, fzIngAR:7,
+    fzPrixInt:52, fzPrixDec:16,
+    allergyY:0.74
+  }
+};
+
 // ═══════════════════════════════════════════════════════════════
 // STATE
 // ═══════════════════════════════════════════════════════════════
@@ -882,10 +1420,181 @@ let state = {
   mapping:     JSON.parse(localStorage.getItem('a7_mapping')||'null') || JSON.parse(JSON.stringify(DEFAULT_MAPPING)),
   productTpl:  JSON.parse(localStorage.getItem('a7_product_tpl')||'{}'),
   history:     JSON.parse(localStorage.getItem('a7_history')||'[]'),
-  tplLayout:   JSON.parse(localStorage.getItem('a7_tpl_layout')||'{}'),
+  tplLayout:   (()=>{
+    // Migration : ancienne clé a7_tpl_layout → a7_tplLayout
+    const v = localStorage.getItem('a7_tplLayout') || localStorage.getItem('a7_tpl_layout') || '{}';
+    const parsed = JSON.parse(v);
+    // Nettoyer l'ancienne clé si elle existe
+    if(localStorage.getItem('a7_tpl_layout')) {
+      localStorage.setItem('a7_tplLayout', v);
+      localStorage.removeItem('a7_tpl_layout');
+    }
+    return parsed;
+  })(),
+  textColors:  JSON.parse(localStorage.getItem('a7_text_colors')||'null') || {
+    designation:'#FFFFFF', designationNoBg:'#111111',
+    prix:'#8B0000', prixNoBg:'#000000',
+    unite:'#F5E6C8', uniteNoBg:'#333333',
+    ingredientsFr:'#FFFFFF', ingredientsFrNoBg:'#000000',
+    ingredientsAr:'#F5E6C8', ingredientsArNoBg:'#000000',
+    allergen:'#FF0000'
+  },
 };
 
-function save(key){ localStorage.setItem('a7_'+key, JSON.stringify(state[key])); }
+function save(key){ localStorage.setItem('a7_'+key, JSON.stringify(state[key])); setTimeout(autoSaveNow, 300); }
+
+function applyTextColors(){
+  const C = state.textColors;
+  C.designation = $('#colDes').value;
+  C.prix = $('#colPrix').value;
+  C.unite = $('#colUnite').value;
+  C.ingredientsFr = $('#colIngFr').value;
+  C.ingredientsAr = $('#colIngAr').value;
+  C.allergen = $('#colAllergen').value;
+  // Auto-génère versions sans fond (plus foncées pour contraste)
+  C.designationNoBg = '#000000';
+  C.prixNoBg = C.prix;
+  C.uniteNoBg = '#333333';
+  C.ingredientsFrNoBg = '#000000';
+  C.ingredientsArNoBg = '#000000';
+  save('textColors');
+  toast('Couleurs appliquées ✓','ok');
+  if(currentProduct) lookup(); // refresh preview
+}
+
+function resetTextColors(){
+  state.textColors = {
+    designation:'#FFFFFF', designationNoBg:'#111111',
+    prix:'#FFFFFF', prixNoBg:'#000000', // CONTRASTE AMÉLIORÉ: blanc sur fond
+    unite:'#FFFF00', uniteNoBg:'#333333', // jaune vif pour contraste
+    ingredientsFr:'#FFFFFF', ingredientsFrNoBg:'#000000',
+    ingredientsAr:'#FFFFFF', ingredientsArNoBg:'#000000',
+    allergen:'#FF0000'
+  };
+  save('textColors');
+  loadTextColorsUI();
+  toast('Couleurs réinitialisées (contraste max)','ok');
+  if(currentProduct) lookup();
+}
+
+function loadTextColorsUI(){
+  const C = state.textColors;
+  if($('#colDes')) $('#colDes').value = C.designation;
+  if($('#colPrix')) $('#colPrix').value = C.prix;
+  if($('#colUnite')) $('#colUnite').value = C.unite;
+  if($('#colIngFr')) $('#colIngFr').value = C.ingredientsFr;
+  if($('#colIngAr')) $('#colIngAr').value = C.ingredientsAr;
+  if($('#colAllergen')) $('#colAllergen').value = C.allergen;
+}
+
+// --- Auto-sauvegarde dossier (File System Access API) ---
+const IDB_DB='a7_db', IDB_STORE='handles';
+function idbReq(store, mode, cb){ const r=indexedDB.open(IDB_DB,1); r.onupgradeneeded=()=>r.result.createObjectStore(IDB_STORE); r.onsuccess=()=>cb(r.result.transaction(IDB_STORE,mode).objectStore(IDB_STORE)); }
+function idbSet(k,v){ return new Promise(res=>idbReq(IDB_STORE,'readwrite',s=>{s.put(v,k).onsuccess=()=>res();})); }
+function idbGet(k){ return new Promise(res=>idbReq(IDB_STORE,'readonly',s=>{const g=s.get(k); g.onsuccess=()=>res(g.result); g.onerror=()=>res(null);})); }
+
+async function enableAutoSave(){
+  if(!window.showDirectoryPicker){ toast('Navigateur non compatible (utilise Chrome/Edge)','err'); return; }
+  try{
+    const dir = await showDirectoryPicker({mode:'readwrite'});
+    await idbSet('autosave_dir', dir);
+    await dir.requestPermission({mode:'readwrite'});
+    toast('Dossier auto-sauvegarde choisi ✓','ok');
+    $('#autoSaveStatus').textContent = 'Activé';
+    autoSaveNow();
+  }catch(e){ console.log(e); }
+}
+
+async function autoSaveNow(){
+  try{
+    const dir = await idbGet('autosave_dir');
+    if(!dir) return;
+    const perm = await dir.queryPermission({mode:'readwrite'});
+    if(perm!=='granted') return;
+    const data = {
+      base: state.base, queue: state.queue, templates: state.templates,
+      mapping: state.mapping, productTpl: state.productTpl, history: state.history,
+      tplLayout: state.tplLayout, textColors: state.textColors,
+      exportDate: new Date().toISOString(), version:'A7-v4-auto'
+    };
+    const fh = await dir.getFileHandle('A7_auto_backup.json',{create:true});
+    const w = await fh.createWritable();
+    await w.write(JSON.stringify(data,null,2));
+    await w.close();
+  }catch(e){ console.warn('Auto-save failed',e); }
+}
+
+async function autoRestore(){
+  try{
+    // Si données déjà présentes, ne rien faire
+    if(state.base && state.base.length>0) return;
+    const dir = await idbGet('autosave_dir');
+    if(!dir) return;
+    const perm = await dir.queryPermission({mode:'read'});
+    if(perm!=='granted'){ await dir.requestPermission({mode:'read'}); }
+    const fh = await dir.getFileHandle('A7_auto_backup.json');
+    const file = await fh.getFile();
+    const data = JSON.parse(await file.text());
+    if(data.base){ 
+      state.base = data.base; state.queue=data.queue||[]; state.templates=data.templates||{};
+      state.mapping=data.mapping||state.mapping; state.productTpl=data.productTpl||{};
+      state.history=data.history||[]; state.tplLayout=data.tplLayout||{}; state.textColors=data.textColors||state.textColors;
+      ['base','queue','templates','mapping','productTpl','history','tplLayout','textColors'].forEach(k=>save(k));
+      toast('Restauration automatique réussie ✓ — Rechargez si nécessaire','ok');
+      // Ne pas recharger automatiquement pour éviter les boucles
+    }
+  }catch(e){ console.log('Pas de backup auto',e); }
+}
+
+function exportAllData(){
+  const data = {
+    base: state.base,
+    queue: state.queue,
+    templates: state.templates,
+    mapping: state.mapping,
+    productTpl: state.productTpl,
+    history: state.history,
+    tplLayout: state.tplLayout,
+    textColors: state.textColors,
+    exportDate: new Date().toISOString(),
+    version: 'A7-v3'
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], {type:'application/json'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url;
+  a.download = `A7_backup_${new Date().toISOString().slice(0,10)}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('Sauvegarde complète téléchargée ✓','ok');
+}
+
+function importAllData(input){
+  const file = input.files[0];
+  if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    try{
+      const data = JSON.parse(e.target.result);
+      if(confirm('Restaurer cette sauvegarde ? Cela remplacera toutes les données actuelles.')){
+        state.base = data.base||[];
+        state.queue = data.queue||[];
+        state.templates = data.templates||{};
+        state.mapping = data.mapping||state.mapping;
+        state.productTpl = data.productTpl||{};
+        state.history = data.history||[];
+        state.tplLayout = data.tplLayout||{};
+        state.textColors = data.textColors||state.textColors;
+        // Sauvegarder tout
+        ['base','queue','templates','mapping','productTpl','history','tplLayout','textColors'].forEach(k=>save(k));
+        toast('Données restaurées ✓ Rechargez la page','ok');
+        setTimeout(()=>location.reload(), 1200);
+      }
+    }catch(err){ toast('Fichier invalide: '+err.message,'err'); }
+  };
+  reader.readAsText(file);
+  input.value='';
+}
 
 // ═══════════════════════════════════════════════════════════════
 // UTILS
@@ -901,6 +1610,41 @@ function toast(msg, type='ok'){
   setTimeout(()=>el.style.opacity='0', 2500);
   setTimeout(()=>el.remove(), 2800);
 }
+
+function calcFidelite(prix, pct){
+  const p = parseFloat(String(prix).replace(',','.'));
+  const f = parseFloat(String(pct).replace(',','.'));
+  if(isNaN(p)||isNaN(f)||p<=0||f<=0) return null;
+  return (p * f / 100);
+}
+
+function onFideliteChange(){
+  const pctEl = document.getElementById('fideliteInput');
+  const prixEl = document.getElementById('priceInput');
+  const dispEl = document.getElementById('fideliteCalcDisplay');
+  const infoEl = document.getElementById('fideliteInfo');
+  const pct = pctEl ? pctEl.value.trim() : '';
+  const prix = prixEl ? prixEl.value.trim() : '';
+  if(!pct){ if(dispEl) dispEl.textContent=''; if(infoEl) infoEl.style.display='none'; updatePreview(); return; }
+  const val = calcFidelite(prix, pct);
+  if(val !== null){
+    if(dispEl) dispEl.textContent = '= ' + val.toFixed(2).replace('.',',') + ' DH';
+    if(infoEl){
+      infoEl.textContent = 'Le client gagne ' + val.toFixed(2).replace('.',',') + ' DH en points (' + pct + '% de ' + fmtPrice(prix) + ' DH)';
+      infoEl.style.display='';
+      infoEl.style.color = 'var(--amber)';
+    }
+  } else {
+    if(dispEl) dispEl.textContent = '';
+    if(infoEl){
+      infoEl.textContent = 'Saisissez le prix pour voir le calcul';
+      infoEl.style.display = prix ? '' : 'none';
+      infoEl.style.color = 'var(--text3)';
+    }
+  }
+  updatePreview();
+}
+
 
 function fmtPrice(val){
   const n = parseFloat(String(val).replace(',','.'));
@@ -952,7 +1696,7 @@ function wrapText(ctx, text, x, y, maxW, lineH){
   return ly;
 }
 
-function drawAllergenText(ctx, text, x, y, maxW, fz){
+function drawAllergenText(ctx, text, x, y, maxW, fz, normalColor, allergenColor){
   if(!text) return y;
   const lineH = fz * 1.35;
   const words = text.split(/(\s+)/);
@@ -969,7 +1713,7 @@ function drawAllergenText(ctx, text, x, y, maxW, fz){
       return ctx.measureText(w).width;
     })();
     if(cx + ww > x + maxW){ cx = x; cy += lineH; }
-    ctx.fillStyle = isAlg ? '#dc2626' : '#111';
+    ctx.fillStyle = isAlg ? (allergenColor||'#FF0000') : (normalColor||'#111');
     ctx.fillText(w, cx, cy);
     cx += ww;
     // reset for space measurement
@@ -1028,15 +1772,18 @@ function drawLabelText(ctx, item){
 
   // --- Template has image? Use exact positions matching clean templates ---
   const hasBg = !!state.templates[item.template];
+  const C = state.textColors;
 
   // Layout params (positions en % + tailles police)
-  const L = (state.tplLayout[item.template])||{};
+  // Merge: user customization (state.tplLayout) over POTX defaults
+  const L = Object.assign({}, DEFAULT_TPL_LAYOUT[item.template]||{}, state.tplLayout[item.template]||{});
   const yDesFR  = hasBg ? CH*(L.yDesFR??0.18) : 14*m;
   const yDesAR  = hasBg ? CH*(L.yDesAR??0.28) : 23*m;
-  const ingY    = hasBg ? CH*(L.ingY  ??0.44) : CH*0.55;
-  const ingArY  = hasBg ? CH*(L.ingArY ??0.56) : CH*0.65;
-  const ingMaxH = hasBg ? CH*(L.ingMaxH??0.10): 40*m;
+  const ingY    = hasBg ? CH*(L.ingY  ??0.44) : CH*0.42;
+  const ingArY  = hasBg ? CH*(L.ingArY ??0.56) : CH*0.54;
+  const ingMaxH = hasBg ? CH*(L.ingMaxH??0.12): 60*m;
   const priceY  = hasBg ? CH*(L.priceY??0.82) : 33*m;
+  const priceX  = (hasBg && L.priceX!=null) ? CW*(L.priceX) : null; // null = auto-center
   const uniteX  = hasBg ? CW*(L.uniteX??0.85) : CW/2;
   const uniteY  = hasBg ? CH*(L.uniteY??0.78) : CH*0.75;
 
@@ -1048,7 +1795,7 @@ function drawLabelText(ctx, item){
   const fzUnite   = hasBg ? (L.fzUnite  ??22) : 8*m;
 
   // --- Designation FR ---
-  ctx.fillStyle = hasBg ? '#fff' : '#111';
+  ctx.fillStyle = hasBg ? C.designation : C.designationNoBg;
   const desFR = (item.designation_fr||'').substring(0,50);
   let desFz = fzDesFR;
   ctx.font = `900 ${desFz}px 'BFMarjane', 'Barlow Condensed', sans-serif`;
@@ -1063,7 +1810,7 @@ function drawLabelText(ctx, item){
 
   // --- Designation AR ---
   if(item.designation_ar){
-    ctx.fillStyle = hasBg ? '#fff' : '#555';
+    ctx.fillStyle = hasBg ? C.designation : C.designationNoBg;
     ctx.font = `500 ${fzDesAR}px 'BFMarjane', 'IBM Plex Sans Arabic', sans-serif`;
     ctx.textAlign = 'center';
     ctx.fillText((item.designation_ar||'').substring(0,40), CW/2, yDesAR);
@@ -1079,14 +1826,14 @@ function drawLabelText(ctx, item){
   const fzDec = hasBg ? (L.fzPrixDec??26) : (isSpecial ? 10*m : 13*m);
   
   ctx.textBaseline = 'alphabetic';
-  ctx.fillStyle = hasBg ? '#8B0000' : '#111';
+  ctx.fillStyle = hasBg ? C.prix : C.prixNoBg;
   ctx.font = `900 ${fzInt}px 'BFMarjane', 'Barlow Condensed', sans-serif`;
   const intW = ctx.measureText(intPart).width;
   ctx.font = `900 ${fzDec}px 'BFMarjane', 'Barlow Condensed', sans-serif`;
   const decW = ctx.measureText(decPart).width;
   const dhW  = ctx.measureText(' dh').width;
   const totalW = intW + decW + dhW;
-  const startX = (CW - totalW) / 2;
+  const startX = (priceX != null) ? priceX : (CW - totalW) / 2;
   const baseY = priceY + fzInt*0.8;
   ctx.font = `900 ${fzInt}px 'BFMarjane', 'Barlow Condensed', sans-serif`;
   ctx.fillText(intPart, startX, baseY);
@@ -1097,7 +1844,7 @@ function drawLabelText(ctx, item){
   // --- Unité ---
   ctx.textBaseline = 'middle';
   ctx.font = `900 ${fzUnite}px 'BFMarjane', 'Barlow Condensed', sans-serif`;
-  ctx.fillStyle = hasBg ? '#F5E6C8' : '#666';
+  ctx.fillStyle = hasBg ? C.unite : C.uniteNoBg;
   ctx.textAlign = hasBg ? 'right' : 'center';
   const uniteText = (item.unite||'PIÈCE').toUpperCase();
   ctx.fillText(uniteText, uniteX, uniteY);
@@ -1118,51 +1865,258 @@ function drawLabelText(ctx, item){
     }
   }
 
+
+  // ─── Rectangle 11 — Fidélité (slides B_FIL, B_FIL_MN, FROM_CAN) ────
+  // Reproduit exactement la logique VBA :
+  //   formattedRectangle11Value = Format(prix * %fid/100, "0.00") & "dh"
+  //   Partie entière  → fzFidInt (24pt) ; partie déc + "dh" → fzFidDec (10pt)
+  const isFidSlide = SPECIAL_TPL.includes(item.template);
+  if(isFidSlide && item.fidelite){
+    const pct  = parseFloat(String(item.fidelite).replace(',','.'));
+    const prixN = parseFloat(String(item.prix).replace(',','.'));
+    if(!isNaN(pct) && pct > 0 && !isNaN(prixN) && prixN > 0){
+      const fidVal  = prixN * pct / 100;
+      const fidFmt  = fidVal.toFixed(2).replace('.',',');
+      const commaI  = fidFmt.indexOf(',');
+      const intPart = commaI > 0 ? fidFmt.substring(0, commaI) : fidFmt;
+      const decPart = (commaI > 0 ? fidFmt.substring(commaI) : ',00') + 'dh';
+
+      // Zone Rectangle 11 — position depuis layout (% du canvas)
+      const fX = hasBg ? (L.fidX ?? 0.60) * CW : (L.fidX ?? 0.60) * CW;
+      const fY = hasBg ? (L.fidY ?? 0.48) * CH : (L.fidY ?? 0.48) * CH;
+      const fW = hasBg ? (L.fidW ?? 0.38) * CW : (L.fidW ?? 0.38) * CW;
+      const fH = hasBg ? (L.fidH ?? 0.29) * CH : (L.fidH ?? 0.29) * CH;
+      const fzInt = L.fzFidInt ?? 24;
+      const fzDec = L.fzFidDec ?? 10;
+
+      // Fond du rectangle fidélité (si pas d'image bg, on dessine un fond)
+      if(!hasBg){
+        ctx.save();
+        ctx.fillStyle = 'rgba(0,68,151,0.12)';
+        ctx.strokeStyle = 'rgba(0,68,151,0.4)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.roundRect(fX, fY, fW, fH, 6);
+        ctx.fill(); ctx.stroke();
+        ctx.restore();
+      }
+
+      // Label arabe «ربح» (gagner) — en haut à droite du rectangle fidélité
+      const fidLabelAr = 'رْبح';
+      ctx.save();
+      ctx.font = 'bold ' + (fzDec + 2) + 'px sans-serif';
+      ctx.fillStyle = hasBg ? '#ffffff' : '#004497';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      ctx.fillText(fidLabelAr, fX + fW/2, fY + 4);
+      ctx.restore();
+
+      // Montant fidélité : partie entière (grande) + déc+dh (petite)
+      ctx.save();
+      ctx.textBaseline = 'alphabetic';
+      ctx.fillStyle = hasBg ? '#ffffff' : '#004497';
+      ctx.font = '900 ' + fzInt + 'px BFMarjane, Barlow Condensed, sans-serif';
+      const iW = ctx.measureText(intPart).width;
+      ctx.font = '900 ' + fzDec + 'px BFMarjane, Barlow Condensed, sans-serif';
+      const dW = ctx.measureText(decPart).width;
+      const totalFW = iW + dW;
+      const startFX = fX + (fW - totalFW) / 2;
+      const baseYF  = fY + fH * 0.55 + fzInt * 0.45;
+      ctx.font = '900 ' + fzInt + 'px BFMarjane, Barlow Condensed, sans-serif';
+      ctx.textAlign = 'left';
+      ctx.fillText(intPart, startFX, baseYF);
+      ctx.font = '900 ' + fzDec + 'px BFMarjane, Barlow Condensed, sans-serif';
+      ctx.fillText(decPart, startFX + iW, baseYF - (fzInt - fzDec) * 0.28);
+      ctx.restore();
+
+      // Label arabe «على بطاقتكم» (sur votre carte) — sous le montant
+      ctx.save();
+      ctx.font = (fzDec + 1) + 'px IBM Plex Sans Arabic, sans-serif';
+      ctx.fillStyle = hasBg ? 'rgba(255,255,255,0.85)' : '#004497';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      const labelArabicY = hasBg ? (L.fidLabelArabicY ?? 0.72) * CH : fY + fH * 0.72;
+      ctx.fillText('على بطاقتكم', fX + fW / 2, labelArabicY);
+      ctx.restore();
+
+      // Indicateur % dans le coin (petit)
+      ctx.save();
+      ctx.font = 'bold ' + (fzDec - 1) + 'px sans-serif';
+      ctx.fillStyle = hasBg ? 'rgba(255,255,220,0.9)' : '#f59e0b';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
+      ctx.fillText(pct + '%', fX + 3, fY + 3);
+      ctx.restore();
+    }
+  } else if(!isFidSlide && item.fidelite){
+    // Pour les autres slides : petit badge discret en bas à droite
+    const pct  = parseFloat(String(item.fidelite).replace(',','.'));
+    const prixN = parseFloat(String(item.prix).replace(',','.'));
+    if(!isNaN(pct) && pct > 0 && !isNaN(prixN) && prixN > 0){
+      const fidVal = prixN * pct / 100;
+      const fidStr = fidVal.toFixed(2).replace('.',',') + 'dh';
+      const label  = pct + '% = ' + fidStr;
+      ctx.save();
+      ctx.font = 'bold 9px sans-serif';
+      const tw = ctx.measureText(label).width + 10;
+      const bx = CW - 3; const by = CH * (L.allergyY ?? 0.72) - 14;
+      ctx.fillStyle = 'rgba(245,158,11,0.15)';
+      ctx.strokeStyle = 'rgba(245,158,11,0.5)';
+      ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.roundRect(bx - tw, by - 6, tw, 14, 3); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#f59e0b';
+      ctx.textAlign = 'right'; ctx.textBaseline = 'middle';
+      ctx.fillText(label, bx - 5, by + 1);
+      ctx.restore();
+    }
+  }
+
   // --- Ingrédients AR/FR avec AUTO-FIT ---
   if(hasIng){
-    const useAr = item.ingredients_ar && item.ingredients_ar.trim().length>0;
-    const ingText = useAr ? item.ingredients_ar : item.ingredients_fr;
-    if(ingText){
-      const maxW = CW*0.9;
-      const startXIng = CW*0.05;
+    const minFz = hasBg ? 7 : 4*m;
+
+    // ── Rectangle blanc arrondi pour ingrédients FR ──
+    // Dimensions physiques : 7.05cm × 1.67cm → 211.5 × 50.1 px (à S=3px/mm)
+    const BOX_W  = hasBg ? (L.ingBoxW  ?? 211.5) : CW*0.92;
+    const BOX_H  = hasBg ? (L.ingBoxH  ?? 50.1)  : 60*m;
+    const BOX_X  = hasBg ? (L.ingBoxX  ?? (CW - (L.ingBoxW??211.5))/2) : CW*0.04;
+    const BOX_Y  = hasBg ? CH*(L.ingY  ?? 0.44)  : CH*0.42;
+    const BOX_PAD_X = 5;   // padding horizontal intérieur
+    const BOX_PAD_Y = 4;   // padding vertical intérieur
+    const BOX_R    = 6;    // rayon arrondi
+
+    // Zone de texte disponible dans le rectangle
+    const maxW     = BOX_W - BOX_PAD_X * 2;
+    const maxH     = BOX_H - BOX_PAD_Y * 2;
+    const startXIng = BOX_X + BOX_PAD_X;
+    const textY     = BOX_Y + BOX_PAD_Y;
+
+    // FRANÇAIS en premier
+    if(item.ingredients_fr && item.ingredients_fr.trim().length>0){
+      let ingText = item.ingredients_fr.trim();
+
+      // Dessiner le rectangle blanc arrondi
+      ctx.save();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.roundRect(BOX_X, BOX_Y, BOX_W, BOX_H, BOX_R);
+      ctx.fill();
+      ctx.restore();
+
+      // Auto-fit : réduire la taille jusqu'à ce que tout rentre
       let fz = fzIngFR;
-      const minFz = hasBg ? 7 : 4*m;
-      while(fz >= minFz){
-        ctx.font = `${useAr?'500 ':''}${fz}px ${useAr?"'IBM Plex Sans Arabic','BFMarjane',sans-serif":"sans-serif"}`;
-        const lineH = fz * 1.3;
+      while(fz > minFz){
+        ctx.font = `${fz}px sans-serif`;
+        const lineH = fz * 1.25;
         const words = ingText.split(' ');
         let lines = 1, lineW = 0;
         for(const w of words){
           const ww = ctx.measureText(w + ' ').width;
           if(lineW + ww > maxW){ lines++; lineW = ww; } else { lineW += ww; }
         }
-        if(lines * lineH <= ingMaxH) break;
+        if(lines * lineH <= maxH) break;
         fz -= 0.5;
       }
-      if(useAr){
-        // Arabe : aligné à droite, sans surlignage allergènes
-        ctx.textAlign = 'right';
-        ctx.textBaseline = 'top';
-        ctx.fillStyle = hasBg ? '#F5E6C8' : '#111';
+      if(fz < minFz) fz = minFz;
+
+      // Clip au rectangle pour ne jamais déborder
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(BOX_X, BOX_Y, BOX_W, BOX_H, BOX_R);
+      ctx.clip();
+      drawAllergenText(ctx, ingText, startXIng, textY, maxW, fz, '#222222', C.allergen);
+      ctx.restore();
+    }
+
+    // ARABE en dessous — dans son propre rectangle blanc arrondi
+    if(item.ingredients_ar && item.ingredients_ar.trim().length>0){
+      let ingText = item.ingredients_ar.trim();
+
+      // Boîte AR : même largeur que FR, juste en dessous avec 6px d'espace
+      const BOX_AR_W = BOX_W;
+      const BOX_AR_H = hasBg ? (L.ingArBoxH ?? 50) : 60*m;
+      const BOX_AR_X = BOX_X;
+      const BOX_AR_Y = BOX_Y + BOX_H + 6;
+      const maxWAR   = BOX_AR_W - BOX_PAD_X * 2;
+      const maxHAR   = BOX_AR_H - BOX_PAD_Y * 2;
+      const startXAR = BOX_AR_X + BOX_PAD_X;
+      const textYAR  = BOX_AR_Y + BOX_PAD_Y;
+
+      // Dessiner le rectangle blanc arrondi AR
+      ctx.save();
+      ctx.fillStyle = '#FFFFFF';
+      ctx.beginPath();
+      ctx.roundRect(BOX_AR_X, BOX_AR_Y, BOX_AR_W, BOX_AR_H, BOX_R);
+      ctx.fill();
+      ctx.restore();
+
+      // Auto-fit police AR
+      let fz = fzIngAR;
+      while(fz > minFz){
         ctx.font = `500 ${fz}px 'IBM Plex Sans Arabic','BFMarjane',sans-serif`;
+        const lineH = fz * 1.35;
         const words = ingText.split(' ');
-        let line='', cy=ingY;
-        const lineH = fz*1.35;
-        const rightX = startXIng + maxW;
-        for(let i=0;i<words.length;i++){
-          const test = line ? line+' '+words[i] : words[i];
-          if(ctx.measureText(test).width > maxW && line){
-            ctx.fillText(line, rightX, cy);
-            line = words[i];
-            cy += lineH;
-            if(cy > ingY + ingMaxH) break;
-          }else{ line = test; }
+        let lines = 1, lineW = 0;
+        for(const w of words){
+          const ww = ctx.measureText(w + ' ').width;
+          if(lineW + ww > maxWAR){ lines++; lineW = ww; } else { lineW += ww; }
         }
-        if(line && cy <= ingY + ingMaxH) ctx.fillText(line, rightX, cy);
-        ctx.textAlign = 'left';
-      }else{
-        drawAllergenText(ctx, ingText, startXIng, ingY, maxW, fz);
+        if(lines * lineH <= maxHAR) break;
+        fz -= 0.5;
       }
+      if(fz < minFz) fz = minFz;
+
+      // Clip + dessiner texte AR (RTL, aligné à droite) avec allergènes en rouge
+      ctx.save();
+      ctx.beginPath();
+      ctx.roundRect(BOX_AR_X, BOX_AR_Y, BOX_AR_W, BOX_AR_H, BOX_R);
+      ctx.clip();
+      ctx.textBaseline = 'top';
+      const wordsAR = ingText.split(' ');
+      const rightXAR = startXAR + maxWAR;
+      const lineHAR = fz * 1.35;
+      // Build lines first (RTL wrap)
+      const linesAR = [];
+      let curLine = [];
+      let curLineW = 0;
+      ctx.font = `500 ${fz}px 'IBM Plex Sans Arabic','BFMarjane',sans-serif`;
+      for (let i = 0; i < wordsAR.length; i++) {
+        const word = wordsAR[i];
+        const ww = ctx.measureText(word).width;
+        const spaceW = ctx.measureText(' ').width;
+        if (curLine.length > 0 && curLineW + spaceW + ww > maxWAR) {
+          linesAR.push(curLine);
+          curLine = [{word, ww}];
+          curLineW = ww;
+        } else {
+          if (curLine.length > 0) curLineW += spaceW;
+          curLine.push({word, ww});
+          curLineW += ww;
+        }
+      }
+      if (curLine.length > 0) linesAR.push(curLine);
+      // Render each line word by word, RTL from right
+      let cyAR = textYAR;
+      for (const line of linesAR) {
+        if (cyAR > BOX_AR_Y + BOX_AR_H) break;
+        let px = rightXAR;
+        // RTL: render words right-to-left
+        for (let i = 0; i < line.length; i++) {
+          const {word, ww} = line[i];
+          const isAlg = isAllergenAr(word);
+          ctx.font = isAlg
+            ? `bold ${fz}px 'IBM Plex Sans Arabic','BFMarjane',sans-serif`
+            : `500 ${fz}px 'IBM Plex Sans Arabic','BFMarjane',sans-serif`;
+          ctx.fillStyle = isAlg ? (C.allergen || '#FF0000') : (C.ingAr || '#222222');
+          ctx.textAlign = 'right';
+          ctx.fillText(word, px, cyAR);
+          const spaceW = ctx.measureText(' ').width;
+          px -= (ww + spaceW);
+        }
+        cyAR += lineHAR;
+      }
+      ctx.restore();
+      ctx.textAlign = 'left';
     }
   }
 
@@ -1234,7 +2188,9 @@ function buildCurrentItem(){
     unite: $('#uniteInput').value,
     template,
     grammage: $('#grammageInput').value.trim(),
+    fidelite: (document.getElementById('fideliteInput')||{value:''}).value.trim(),
     ingredients_fr: currentProduct?.ingredients_fr||'',
+    ingredients_ar: currentProduct?.ingredients_ar||'',
     origine: currentProduct?.origine||'',
     col_j: currentProduct?.col_j||'',
     col_k: currentProduct?.col_k||''
@@ -1285,7 +2241,7 @@ function addToQueue(){
   updateCounters();
   toast(`Ajouté: ${item.designation_fr||item.code}`,'ok');
   // Reset
-  $('#codeInput').value=''; $('#priceInput').value=''; $('#grammageInput').value='';
+  $('#codeInput').value=''; $('#priceInput').value=''; $('#grammageInput').value=''; document.getElementById('fideliteInput').value=''; document.getElementById('fideliteCalcDisplay').textContent=''; document.getElementById('fideliteInfo').style.display='none';
   currentProduct=null; clearPreview($('#previewCanvas')); setStatus('','');
   $('#codeInput').focus();
 }
@@ -1307,6 +2263,7 @@ function renderQueue(){
       <td style="color:var(--amber);font-weight:700;font-family:'IBM Plex Mono'">${it.prix} DH</td>
       <td style="color:var(--text3)">/${it.unite}</td>
       <td style="color:var(--text3);font-size:12px">${it.grammage?it.grammage+' kg':'—'}</td>
+      <td style="color:var(--amber);font-size:12px">${it.fidelite?it.fidelite+'%':'—'}</td>
       <td style="text-align:right">
         <button class="btn btn-ghost btn-sm" onclick="removeFromQueue(${i})"><i class="ri-close-line"></i></button>
       </td>`;
@@ -1359,13 +2316,142 @@ async function generatePDF(){
       drawDefaultBg(ctx,item.template);
       drawLabelText(ctx,item);
     }
+    // ── Signature MTARABET ──────────────────────────────────
+    (function drawSignature(ctx, cw, ch){
+      ctx.save();
+      // Fond pill
+      const sig = 'MTARABET';
+      const fz = Math.round(cw * 0.042);
+      ctx.font = '600 ' + fz + 'px IBM Plex Mono, monospace';
+      const tw = ctx.measureText(sig).width;
+      const px2 = cw - tw - 10, py2 = ch - fz - 4;
+      // Capsule semi-transparente
+      ctx.globalAlpha = 0.55;
+      ctx.fillStyle = '#000';
+      ctx.beginPath();
+      ctx.roundRect(px2 - 4, py2 - 2, tw + 8, fz + 4, 3);
+      ctx.fill();
+      // Texte
+      ctx.globalAlpha = 0.72;
+      ctx.fillStyle = '#f5c518';
+      ctx.textBaseline = 'top';
+      ctx.textAlign = 'left';
+      ctx.fillText(sig, px2, py2);
+      ctx.globalAlpha = 1;
+      ctx.restore();
+    })(offCanvas.getContext('2d'), CW, CH);
+    // ────────────────────────────────────────────────────────
+
     const imgData = offCanvas.toDataURL('image/jpeg',0.92);
     pdf.addImage(imgData,'JPEG',px,py,W,H);
     idx++;
   }
 
+  // Pied de page PDF discret sur chaque page
+  const totalPages = pdf.internal.getNumberOfPages();
+  for(let p=1; p<=totalPages; p++){
+    pdf.setPage(p);
+    pdf.setFontSize(6);
+    pdf.setTextColor(160,160,160);
+    pdf.text('A7 v2.1 · MTARABET · Marjane Tanger 08 · ' + new Date().toLocaleDateString('fr-FR'), 5, 293);
+    pdf.text('Page ' + p + '/' + totalPages, 200, 293, {align:'right'});
+  }
+
   pdf.save(`Etiquettes_A7_${new Date().toISOString().slice(0,10)}.pdf`);
   toast(`PDF généré — ${state.queue.length} étiquettes`,'ok');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// PARTAGE PAR EMAIL / WHATSAPP
+// ═══════════════════════════════════════════════════════════════
+
+// Génère le PDF en blob (partagé par email et whatsapp)
+async function buildPdfFile() {
+  const {jsPDF} = window.jspdf;
+  const pdf = new jsPDF({orientation:'portrait',unit:'mm',format:'a4'});
+  const W=95, H=57, margin=10;
+  const positions=[{x:margin,y:margin},{x:margin+W+5,y:margin},{x:margin,y:margin+H+8},{x:margin+W+5,y:margin+H+8}];
+  for(let idx=0;idx<state.queue.length;idx++){
+    const item=state.queue[idx];
+    if(idx>0 && idx%4===0) pdf.addPage();
+    const pos=positions[idx%4];
+    const cv=document.createElement('canvas'); cv.width=370; cv.height=222;
+    await drawLabelOnCanvas(cv, item);
+    const imgData=cv.toDataURL('image/jpeg',0.92);
+    pdf.addImage(imgData,'JPEG',pos.x,pos.y,W,H);
+  }
+  const pdfBlob = pdf.output('blob');
+  const fileName = `Etiquettes_A7_${new Date().toISOString().slice(0,10)}.pdf`;
+  return new File([pdfBlob], fileName, {type:'application/pdf'});
+}
+
+async function shareByEmail() {
+  if(!state.queue.length){ toast('La file est vide','error'); return; }
+  toast('Génération du PDF…','info');
+  try {
+    const pdfFile = await buildPdfFile();
+    const subject = `Étiquettes A7 — ${new Date().toLocaleDateString('fr-FR')} (${state.queue.length} article(s))`;
+    const body = `Bonjour,\n\nVeuillez trouver ci-joint le PDF des étiquettes A7 pour ${state.queue.length} article(s) :\n\n`
+      + state.queue.map(p=>`• ${p.code} — ${p.designation_fr||''} — ${p.prix||''}dh`).join('\n')
+      + `\n\nGénéré le ${new Date().toLocaleString('fr-FR')}\nA7 Label Manager · Marjane`;
+
+    // Web Share API avec fichier PDF (Android Chrome, iOS Safari 15.1+)
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[pdfFile]})){
+      await navigator.share({
+        title: subject,
+        text: body,
+        files: [pdfFile]
+      });
+      toast('PDF partagé par email ✓','ok');
+    } else {
+      // Desktop fallback : télécharger + ouvrir client mail
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(pdfFile);
+      a.download = pdfFile.name;
+      a.click();
+      setTimeout(()=>{
+        window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      }, 800);
+      toast('PDF téléchargé + client mail ouvert','ok');
+    }
+  } catch(e) {
+    if(e.name !== 'AbortError') toast('Erreur : ' + e.message,'error');
+  }
+}
+
+async function shareByWhatsApp() {
+  if(!state.queue.length){ toast('La file est vide','error'); return; }
+  toast('Génération du PDF…','info');
+  try {
+    const pdfFile = await buildPdfFile();
+    const date = new Date().toLocaleDateString('fr-FR');
+    const title = `Étiquettes A7 — ${date}`;
+    const body = `📦 Étiquettes A7 — ${date}\n${state.queue.length} article(s) :\n\n`
+      + state.queue.map((p,i)=>`${i+1}. ${p.code} — ${p.designation_fr||p.designation_ar||'?'} — ${p.prix||'—'}dh ${p.unite||'PIÈCE'}`).join('\n')
+      + `\n\nGénéré par A7 Label Manager · Marjane`;
+
+    // Web Share API avec fichier PDF (Android + iOS)
+    // WhatsApp mobile reçoit le PDF via le sélecteur de partage natif
+    if(navigator.share && navigator.canShare && navigator.canShare({files:[pdfFile]})){
+      await navigator.share({
+        title: title,
+        text: body,
+        files: [pdfFile]
+      });
+      toast('PDF partagé sur WhatsApp ✓','ok');
+    } else {
+      // Desktop fallback : télécharger + ouvrir WhatsApp Web (texte seul)
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(pdfFile);
+      a.download = pdfFile.name;
+      a.click();
+      const encoded = encodeURIComponent(body + '\n\n(PDF joint téléchargé séparément)');
+      setTimeout(()=>{ window.open(`https://wa.me/?text=${encoded}`, '_blank'); }, 800);
+      toast('PDF téléchargé + WhatsApp Web ouvert','ok');
+    }
+  } catch(e) {
+    if(e.name !== 'AbortError') toast('Erreur : ' + e.message,'error');
+  }
 }
 
 // ═══════════════════════════════════════════════════════════════
@@ -1389,11 +2475,12 @@ function importExcelToQueue(input){
         const unite = r[2]||'pièce';
         const template = r[3]||findTemplate(code,prod);
         const grammage = r[4]||'';
+        const fidelite = String(r[5]||'').trim();
         const item = {
           id:Date.now()+i,
           code, designation_fr:prod.designation_fr, designation_ar:prod.designation_ar,
-          prix, unite, template, grammage,
-          ingredients_fr:prod.ingredients_fr, origine:prod.origine,
+          prix, unite, template, grammage, fidelite,
+          ingredients_fr:prod.ingredients_fr, ingredients_ar:prod.ingredients_ar, origine:prod.origine,
           col_j:prod.col_j, col_k:prod.col_k
         };
         state.queue.push(item);
@@ -1446,6 +2533,12 @@ function renderBase(){
 function renderIngHtml(text, maxLen){
   if(!text) return '';
   const t = text.length>maxLen ? text.substring(0,maxLen)+'…' : text;
+  const isArabic = /[\u0600-\u06FF]/.test(t);
+  if(isArabic){
+    return t.split(' ').map(w =>
+      isAllergenAr(w) ? `<span class="alg">${w}</span>` : w
+    ).join(' ');
+  }
   return t.replace(/(\b[A-Z]{3,}\b)/g, w =>
     isAllergen(w) ? `<span class="alg">${w}</span>` : w
   );
@@ -1587,29 +2680,52 @@ function renderTemplates(){
         <input type="file" accept="image/*" style="display:none" data-name="${name}">
       </label>
       ${url?`<button class="btn btn-red btn-sm" style="justify-content:center" onclick="clearTemplate('${name}')"><i class="ri-delete-bin-line"></i></button>`:''}
-      <details style="margin-top:8px;font-size:11px">
-        <summary style="cursor:pointer;color:var(--text3);font-weight:600">📐 Positions &amp; 🔤 Police</summary>
-        <div style="font-size:10px;color:var(--text4);margin:4px 0 6px;font-style:italic">Positions: % de l'étiquette · Police: px</div>
-        <div style="font-weight:700;font-size:10px;color:var(--amber);margin-bottom:4px">▸ POSITIONS (%)</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 8px;margin-bottom:8px">
-          <label>Désig. FR Y<input type="number" min="0" max="100" value="${pct('yDesFR',0.18)}" data-tpl="${name}" data-key="yDesFR" style="width:100%"></label>
-          <label>Désig. AR Y<input type="number" min="0" max="100" value="${pct('yDesAR',0.28)}" data-tpl="${name}" data-key="yDesAR" style="width:100%"></label>
-          <label>Ingr. FR Y<input type="number" min="0" max="100" value="${pct('ingY',0.44)}" data-tpl="${name}" data-key="ingY" style="width:100%"></label>
-          <label>Ingr. AR Y<input type="number" min="0" max="100" value="${pct('ingArY',0.56)}" data-tpl="${name}" data-key="ingArY" style="width:100%"></label>
-          <label>Ingr. Haut. max<input type="number" min="0" max="100" value="${pct('ingMaxH',0.10)}" data-tpl="${name}" data-key="ingMaxH" style="width:100%"></label>
-          <label>Prix Y<input type="number" min="0" max="100" value="${pct('priceY',0.82)}" data-tpl="${name}" data-key="priceY" style="width:100%"></label>
-          <label>Unité X<input type="number" min="0" max="100" value="${pct('uniteX',0.85)}" data-tpl="${name}" data-key="uniteX" style="width:100%"></label>
-          <label>Unité Y<input type="number" min="0" max="100" value="${pct('uniteY',0.78)}" data-tpl="${name}" data-key="uniteY" style="width:100%"></label>
+      <details style="margin-top:8px;font-size:13px">
+        <summary style="cursor:pointer;color:var(--amber);font-weight:700;padding:6px 0;font-size:13px">📐 Positions &amp; 🔤 Police</summary>
+        <div style="font-size:12px;color:var(--text3);margin:6px 0 8px;font-style:italic">Positions: % de l'étiquette · Police: px</div>
+        <div style="font-weight:700;font-size:12px;color:var(--amber);margin-bottom:6px">▸ POSITIONS (%)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-bottom:10px">
+          <label style="font-size:12px;color:var(--text2)">Désig. FR Y<input type="number" min="0" max="100" value="${pct('yDesFR',0.18)}" data-tpl="${name}" data-key="yDesFR" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Désig. AR Y<input type="number" min="0" max="100" value="${pct('yDesAR',0.28)}" data-tpl="${name}" data-key="yDesAR" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Ingr. FR Y<input type="number" min="0" max="100" value="${pct('ingY',0.44)}" data-tpl="${name}" data-key="ingY" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Ingr. AR Y<input type="number" min="0" max="100" value="${pct('ingArY',0.56)}" data-tpl="${name}" data-key="ingArY" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Ingr. Haut. max<input type="number" min="0" max="100" value="${pct('ingMaxH',0.10)}" data-tpl="${name}" data-key="ingMaxH" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
         </div>
-        <div style="font-weight:700;font-size:10px;color:var(--amber);margin-bottom:4px">▸ TAILLES POLICE (px)</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:4px 8px">
-          <label>Désig. FR<input type="number" min="6" max="80" value="${L.fzDesFR??24}" data-tpl="${name}" data-key="fzDesFR" data-ispx="1" style="width:100%"></label>
-          <label>Désig. AR<input type="number" min="6" max="80" value="${L.fzDesAR??22}" data-tpl="${name}" data-key="fzDesAR" data-ispx="1" style="width:100%"></label>
-          <label>Ingr. FR<input type="number" min="4" max="40" value="${L.fzIngFR??11}" data-tpl="${name}" data-key="fzIngFR" data-ispx="1" style="width:100%"></label>
-          <label>Ingr. AR<input type="number" min="4" max="40" value="${L.fzIngAR??11}" data-tpl="${name}" data-key="fzIngAR" data-ispx="1" style="width:100%"></label>
-          <label>Prix (entier)<input type="number" min="10" max="120" value="${L.fzPrixInt??68}" data-tpl="${name}" data-key="fzPrixInt" data-ispx="1" style="width:100%"></label>
-          <label>Prix (déc.)<input type="number" min="8" max="60" value="${L.fzPrixDec??26}" data-tpl="${name}" data-key="fzPrixDec" data-ispx="1" style="width:100%"></label>
-          <label>Unité<input type="number" min="8" max="50" value="${L.fzUnite??22}" data-tpl="${name}" data-key="fzUnite" data-ispx="1" style="width:100%"></label>
+        <div style="font-weight:700;font-size:12px;color:#86efac;margin:8px 0 6px">▸ RECTANGLE BLANC INGRÉDIENTS FR (px)</div>
+        <div style="font-size:11px;color:var(--text4);margin-bottom:6px">7.05×1.67cm = 211×50px par défaut</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-bottom:10px">
+          <label style="font-size:12px;color:var(--text2)">Boîte X (px)<input type="number" min="0" max="222" value="${L.ingBoxX??''}" placeholder="auto" data-tpl="${name}" data-key="ingBoxX" data-ispx="1" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Boîte Y (px)<input type="number" min="0" max="315" value="${L.ingBoxY??''}" placeholder="= ingY" data-tpl="${name}" data-key="ingBoxY" data-ispx="1" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Boîte L (px)<input type="number" min="10" max="222" value="${L.ingBoxW??211}" data-tpl="${name}" data-key="ingBoxW" data-ispx="1" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Boîte H FR (px)<input type="number" min="10" max="315" value="${L.ingBoxH??50}" data-tpl="${name}" data-key="ingBoxH" data-ispx="1" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Boîte H AR (px)<input type="number" min="10" max="315" value="${L.ingArBoxH??50}" data-tpl="${name}" data-key="ingArBoxH" data-ispx="1" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-bottom:10px">
+          <label style="font-size:12px;color:var(--text2)" title="Position X du prix en % (vide = centré auto)">Prix X<input type="number" min="0" max="100" value="${L.priceX!=null ? Math.round(L.priceX*100) : ''}" placeholder="auto" data-tpl="${name}" data-key="priceX" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Prix Y<input type="number" min="0" max="100" value="${pct('priceY',0.82)}" data-tpl="${name}" data-key="priceY" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Unité X<input type="number" min="0" max="100" value="${pct('uniteX',0.85)}" data-tpl="${name}" data-key="uniteX" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Unité Y<input type="number" min="0" max="100" value="${pct('uniteY',0.78)}" data-tpl="${name}" data-key="uniteY" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+        </div>
+        <div style="font-weight:700;font-size:12px;color:var(--amber);margin-bottom:6px">▸ TAILLES POLICE (px)</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px;margin-bottom:10px">
+          <label style="font-size:12px;color:var(--text2)">Désig. FR<input type="number" min="6" max="80" value="${L.fzDesFR??24}" data-tpl="${name}" data-key="fzDesFR" data-ispx="1" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Désig. AR<input type="number" min="6" max="80" value="${L.fzDesAR??22}" data-tpl="${name}" data-key="fzDesAR" data-ispx="1" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Ingr. FR<input type="number" min="4" max="40" value="${L.fzIngFR??11}" data-tpl="${name}" data-key="fzIngFR" data-ispx="1" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Ingr. AR<input type="number" min="4" max="40" value="${L.fzIngAR??11}" data-tpl="${name}" data-key="fzIngAR" data-ispx="1" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Prix (entier)<input type="number" min="10" max="120" value="${L.fzPrixInt??68}" data-tpl="${name}" data-key="fzPrixInt" data-ispx="1" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Prix (déc.)<input type="number" min="8" max="60" value="${L.fzPrixDec??26}" data-tpl="${name}" data-key="fzPrixDec" data-ispx="1" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+          <label style="font-size:12px;color:var(--text2)">Unité<input type="number" min="8" max="50" value="${L.fzUnite??22}" data-tpl="${name}" data-key="fzUnite" data-ispx="1" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px"></label>
+        </div>
+        <div style="font-weight:700;font-size:12px;color:#f59e0b;margin:8px 0 6px">▸ FIDÉLITÉ — Rectangle 11</div>
+        <div style="font-size:11px;color:var(--text4);margin-bottom:6px;font-style:italic">Axes en % de l'étiquette · Police en px</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:6px 10px">
+          <label style="font-size:12px;color:var(--text2)">Axe X (%)<input type="number" min="0" max="100" value="${pct('fidX',0.60)}" data-tpl="${name}" data-key="fidX" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px" title="Position horizontale du rectangle fidélité"></label>
+          <label style="font-size:12px;color:var(--text2)">Axe Y (%)<input type="number" min="0" max="100" value="${pct('fidY',0.48)}" data-tpl="${name}" data-key="fidY" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px" title="Position verticale du rectangle fidélité"></label>
+          <label style="font-size:12px;color:var(--text2)">Largeur (%)<input type="number" min="0" max="100" value="${pct('fidW',0.38)}" data-tpl="${name}" data-key="fidW" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px" title="Largeur du rectangle en % du canvas"></label>
+          <label style="font-size:12px;color:var(--text2)">Hauteur (%)<input type="number" min="0" max="100" value="${pct('fidH',0.29)}" data-tpl="${name}" data-key="fidH" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px" title="Hauteur du rectangle en % du canvas"></label>
+          <label style="font-size:12px;color:var(--text2)">Police entier<input type="number" min="6" max="80" value="${L.fzFidInt??24}" data-tpl="${name}" data-key="fzFidInt" data-ispx="1" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px" title="Taille police partie entière (ex: 12)"></label>
+          <label style="font-size:12px;color:var(--text2)">Police déc.<input type="number" min="4" max="40" value="${L.fzFidDec??10}" data-tpl="${name}" data-key="fzFidDec" data-ispx="1" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px" title="Taille police partie décimale (ex: 50dh)"></label>
+          <label style="font-size:12px;color:var(--text2)">Label AR Y (%)<input type="number" min="0" max="100" value="${pct('fidLabelArabicY',0.72)}" data-tpl="${name}" data-key="fidLabelArabicY" style="width:100%;font-size:13px;padding:6px 8px;margin-top:2px" title="Position Y du texte arabe على بطاقتكم"></label>
         </div>
       </details>`;
     grid.appendChild(card);
@@ -1631,9 +2747,14 @@ function renderTemplates(){
     const key=e.target.dataset.key;
     const isPx=e.target.dataset.ispx==='1';
     if(!state.tplLayout[tpl]) state.tplLayout[tpl]={};
-    state.tplLayout[tpl][key]= isPx ? parseFloat(e.target.value) : parseFloat(e.target.value)/100;
-    save('tpl_layout');
-    toast(`${key} → ${e.target.value}${isPx?'px':'%'} (${tpl})`,'ok');
+    const raw = e.target.value.trim();
+    if(raw === '') {
+      state.tplLayout[tpl][key] = null;
+    } else {
+      state.tplLayout[tpl][key] = isPx ? parseFloat(raw) : parseFloat(raw)/100;
+    }
+    save('tplLayout');
+    toast(`${key} → ${raw||'auto'}${raw&&!isPx?'%':raw&&isPx?'px':''} (${tpl})`,'ok');
   }));
 }
 function clearTemplate(name){
@@ -1787,97 +2908,310 @@ async function loadCanvasFonts(){
 }
 
 (function init(){
-  initDefaultAdmin();
+  try {
+    initDefaultAdmin();
+  } catch(e) { console.warn('initDefaultAdmin error:', e); }
+
   const session = getCurrentSession();
   if(session){
     $('#loginOverlay').style.display='none';
-    applySession(session);
+    $('#app').style.display='';
+    try {
+      applySession(session);
+      setTimeout(loadTextColorsUI, 200);
+      setTimeout(autoRestore, 500);
+    } catch(e) { console.warn('applySession error:', e); }
   } else {
-    // show login, hide app
     $('#app').style.display='none';
     $('#loginOverlay').style.display='flex';
-    setTimeout(()=>$('#loginUser').focus(),100);
-    // When login succeeds, app shown — handled in doLogin
-    const _origDoLogin = doLogin;
-    window.doLogin = function(){
-      _origDoLogin();
-      const s = getCurrentSession();
-      if(s){ $('#app').style.display=''; }
-    };
+    setTimeout(()=>{ try{ $('#loginUser').focus(); }catch(e){} }, 100);
   }
-  initTemplateSelect();
-  clearPreview($('#previewCanvas'));
-  updateCounters();
-  // Restore last unite
+
+  try {
+    initTemplateSelect();
+    clearPreview($('#previewCanvas'));
+    updateCounters();
+  } catch(e) { console.warn('init UI error:', e); }
+
   const lu=localStorage.getItem('a7_last_unite');
-  if(lu) $('#uniteInput').value=lu;
-  $('#uniteInput').addEventListener('change',()=>localStorage.setItem('a7_last_unite',$('#uniteInput').value));
-  setTimeout(()=>$('#codeInput').focus(),200);
-  
+  if(lu) try{ $('#uniteInput').value=lu; }catch(e){}
+  try{ $('#uniteInput').addEventListener('change',()=>localStorage.setItem('a7_last_unite',$('#uniteInput').value)); }catch(e){}
+  setTimeout(()=>{ try{ $('#codeInput').focus(); }catch(e){} }, 200);
+})(); // ← fermeture de init()
+
 // ═══════════════════════════════════════════════════════════════
 // SCAN BARCODE MOBILE + SAUVEGARDE AVANT QUITTER
 // ═══════════════════════════════════════════════════════════════
-
 async function startBarcodeScan(){
-  const input = document.getElementById('codeInput');
-  // Vérification contexte sécurisé
-  if(location.protocol !== 'https:' && location.hostname !== 'localhost'){
-    toast('⚠️ Scan nécessite HTTPS - Installe la PWA d'abord', 'err');
-    alert('Pour utiliser la caméra:
-1. Ajoute l'app à l'écran d'accueil
-2. Ouvre depuis l'icône
-(la caméra est bloquée en mode fichier)');
-    return;
+  const input = $('#codeInput');
+
+  // Helper: stop scanner safely
+  async function safeStop(scanner){ try{ await scanner.stop(); }catch(_){} }
+
+  // Helper: remove overlay safely
+  function removeOverlay(){ const el=document.getElementById('scanOverlay'); if(el) el.remove(); }
+
+  // Helper: after successful scan
+  function onScanned(code){
+    input.value = code.trim();
+    input.dispatchEvent(new Event('input',{bubbles:true}));
+    toast('✓ Code scanné : ' + code.trim());
+    setTimeout(()=>{
+      if(typeof onCodeEnter==='function') onCodeEnter();
+      else $('#codeInput').dispatchEvent(new KeyboardEvent('keydown',{key:'Enter',bubbles:true}));
+    }, 250);
   }
-  if(!navigator.mediaDevices || !navigator.mediaDevices.getUserMedia){
-    toast('Caméra non supportée', 'err'); return;
-  }
-  try{
-    // Demande permission explicite
-    await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}}).then(s=>s.getTracks().forEach(t=>t.stop()));
-  }catch(e){
-    toast('Permission caméra refusée', 'err');
+
+  // ── Détection contexte non-sécurisé (file://, content://) ──
+  // getUserMedia est BLOQUÉ dans ces contextes sur Android Chrome.
+  // Seul fallback qui marche : <input type=file capture=environment>
+  // suivi d'une détection BarcodeDetector sur l'image capturée.
+  const isSecure = window.isSecureContext ||
+                   location.protocol === 'https:' ||
+                   location.hostname === 'localhost' ||
+                   location.hostname === '127.0.0.1';
+
+  if(!isSecure){
+    // Contexte non-sécurisé détecté → utiliser caméra native Android
+    await startBarcodeScanFileInput(onScanned);
     return;
   }
 
-  const input = $('#codeInput');
-  try{
+  // Taille adaptive de la boite de scan
+  const boxW = Math.min(window.innerWidth - 40, 300);
+  const boxH = Math.round(boxW * 0.5);
+
+  // ── Méthode 1 : Html5Qrcode (lib externe) ──
+  if(typeof Html5Qrcode !== 'undefined'){
     const overlay = document.createElement('div');
     overlay.id='scanOverlay';
-    overlay.style.cssText='position:fixed;inset:0;background:#000f;z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px';
-    overlay.innerHTML = `<div style="width:100%;max-width:420px;background:#12100c;border:1px solid var(--border);border-radius:16px;padding:16px"><div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px"><div style="font-weight:700;color:var(--amber)">Scanner Code-barres</div><button id="closeScan" style="background:transparent;border:none;color:var(--text3);font-size:20px"><i class="ri-close-line"></i></button></div><div id="qr-reader" style="width:100%;border-radius:12px;overflow:hidden"></div><div style="margin-top:10px;font-size:11px;color:var(--text4);text-align:center">Placez le code dans le cadre</div></div>`;
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px;';
+    overlay.innerHTML = `
+      <div style="width:100%;max-width:440px;background:#12100c;border:1px solid var(--border);border-radius:16px;padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-weight:700;color:var(--amber)"><i class="ri-qr-scan-2-line"></i> Scanner Code-barres</div>
+          <button id="closeScan" style="background:transparent;border:none;color:var(--text3);font-size:22px;cursor:pointer"><i class="ri-close-line"></i></button>
+        </div>
+        <div id="qr-reader" style="width:100%;border-radius:12px;overflow:hidden;background:#000"></div>
+        <div style="margin-top:10px;font-size:12px;color:var(--text4);text-align:center">
+          📷 Pointez la caméra vers le code-barres
+        </div>
+        <div id="scanStatus" style="margin-top:6px;font-size:11px;color:var(--amber);text-align:center"></div>
+      </div>`;
     document.body.appendChild(overlay);
-    
-    const html5QrCode = new Html5Qrcode("qr-reader");
-    const config = { fps: 10, qrbox: { width: 280, height: 140 }, aspectRatio: 1.5, disableFlip:false };
-    
-    await html5QrCode.start(
-      { facingMode: "environment" },
-      config,
-      (decodedText, decodedResult) => {
-        input.value = decodedText.trim();
-        input.dispatchEvent(new Event('input', {bubbles:true}));
-        toast('✓ Code scanné: '+decodedText);
-        html5QrCode.stop().then(()=>overlay.remove()).catch(()=>overlay.remove());
-        setTimeout(()=>{ if(typeof onCodeEnter==='function') onCodeEnter(); else $('#codeInput').dispatchEvent(new KeyboardEvent('keydown',{key:'Enter'})); }, 200);
-      },
-      (errorMessage) => { /* ignore scan errors */ }
-    );
-    
-    $('#closeScan').onclick = () => { html5QrCode.stop().then(()=>overlay.remove()).catch(()=>overlay.remove()); };
-    
-  }catch(e){
-    console.error('Scan error:', e);
-    toast('Caméra indisponible: '+ (e.message||e));
-    const el=document.getElementById('scanOverlay'); if(el) el.remove();
-    // Fallback: try native BarcodeDetector
-    if('BarcodeDetector' in window){
-      try{
-        const stream = await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
-        toast('Utilisation scanner natif...');
-        // ... simplified fallback could be added
-        stream.getTracks().forEach(t=>t.stop());
-      }catch(_){}
+
+    let scanner = null;
+    try {
+      scanner = new Html5Qrcode("qr-reader");
+      const config = {
+        fps: 12,
+        qrbox: { width: boxW, height: boxH },
+        aspectRatio: 1.6,
+        disableFlip: false,
+        formatsToSupport: [
+          Html5QrcodeSupportedFormats.EAN_13,
+          Html5QrcodeSupportedFormats.EAN_8,
+          Html5QrcodeSupportedFormats.CODE_128,
+          Html5QrcodeSupportedFormats.CODE_39,
+          Html5QrcodeSupportedFormats.UPC_A,
+          Html5QrcodeSupportedFormats.UPC_E,
+          Html5QrcodeSupportedFormats.QR_CODE,
+        ]
+      };
+
+      await scanner.start(
+        { facingMode: "environment" },
+        config,
+        async (decodedText) => {
+          await safeStop(scanner);
+          removeOverlay();
+          onScanned(decodedText);
+        },
+        (err) => {
+          // Scan frame errors are normal — ignore
+        }
+      );
+
+      $('#closeScan').onclick = async () => {
+        await safeStop(scanner);
+        removeOverlay();
+      };
+
+    } catch(e) {
+      console.warn('Html5Qrcode start error:', e);
+      await safeStop(scanner);
+      removeOverlay();
+
+      // Permission refusée ?
+      if(e && (e.name==='NotAllowedError' || (e.message||'').toLowerCase().includes('permission'))){
+        toast('❌ Permission caméra refusée. Activez-la dans les réglages du navigateur.', 'error');
+        return;
+      }
+
+      // Sinon : fallback BarcodeDetector natif
+      await startBarcodeScanNative(input, onScanned);
+    }
+
+  } else {
+    // Html5Qrcode non chargée → fallback direct
+    console.warn('Html5Qrcode lib not loaded, trying native BarcodeDetector');
+    await startBarcodeScanNative(input, onScanned);
+  }
+}
+
+// ── Méthode 0 : Caméra native via <input capture> ──
+// SEULE méthode qui fonctionne depuis file:// ou content:// sur Android.
+// Ouvre directement l'appli caméra native, pas besoin de HTTPS.
+async function startBarcodeScanFileInput(onScanned){
+  // Créer un input caméra invisible
+  const fileInput = document.createElement('input');
+  fileInput.type = 'file';
+  fileInput.accept = 'image/*';
+  fileInput.capture = 'environment'; // caméra arrière Android
+
+  const overlay = document.createElement('div');
+  overlay.id = 'scanOverlay';
+  overlay.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,0.88);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:20px';
+  overlay.innerHTML = `
+    <div style="width:100%;max-width:400px;background:#12100c;border:1px solid var(--border);border-radius:16px;padding:20px;text-align:center">
+      <div style="font-size:48px;margin-bottom:12px">📷</div>
+      <div style="font-weight:700;color:var(--amber);font-size:16px;margin-bottom:8px">Scanner Code-barres</div>
+      <div style="font-size:12px;color:var(--text4);margin-bottom:18px">
+        Prenez une photo du code-barres avec la caméra.<br>
+        Le code sera détecté automatiquement.
+      </div>
+      <button id="openCamBtn" style="background:var(--amber);color:#000;border:none;border-radius:10px;padding:12px 28px;font-size:15px;font-weight:700;cursor:pointer;width:100%;margin-bottom:10px">
+        <i class="ri-camera-line"></i> Ouvrir la caméra
+      </button>
+      <div id="scanFileStatus" style="font-size:12px;color:var(--amber);min-height:20px;margin-bottom:8px"></div>
+      <button id="closeScanFile" style="background:transparent;border:1px solid var(--border);color:var(--text3);border-radius:8px;padding:8px 20px;font-size:13px;cursor:pointer;width:100%">
+        Annuler
+      </button>
+    </div>`;
+  document.body.appendChild(overlay);
+
+  const statusEl = document.getElementById('scanFileStatus');
+
+  function closeAll(){
+    const el = document.getElementById('scanOverlay');
+    if(el) el.remove();
+  }
+
+  document.getElementById('closeScanFile').onclick = closeAll;
+
+  document.getElementById('openCamBtn').onclick = () => {
+    fileInput.click();
+  };
+
+  fileInput.onchange = async () => {
+    const file = fileInput.files && fileInput.files[0];
+    if(!file){ closeAll(); return; }
+
+    statusEl.textContent = '⏳ Analyse en cours...';
+
+    try {
+      // Méthode A : BarcodeDetector sur l'image (si dispo)
+      if('BarcodeDetector' in window){
+        const img = await createImageBitmap(file);
+        const formats = await BarcodeDetector.getSupportedFormats();
+        const detector = new BarcodeDetector({ formats });
+        const barcodes = await detector.detect(img);
+        if(barcodes.length > 0){
+          closeAll();
+          onScanned(barcodes[0].rawValue);
+          return;
+        }
+        statusEl.textContent = '⚠️ Aucun code détecté — réessayez plus près';
+        document.getElementById('openCamBtn').textContent = '📷 Réessayer';
+        return;
+      }
+
+      // Méthode B : Html5Qrcode sur l'image uploadée
+      if(typeof Html5Qrcode !== 'undefined'){
+        statusEl.textContent = '⏳ Lecture via Html5Qrcode...';
+        try {
+          const result = await Html5Qrcode.scanFile(file, true);
+          closeAll();
+          onScanned(result);
+          return;
+        } catch(e2) {
+          statusEl.textContent = '⚠️ Aucun code détecté — réessayez plus près';
+          document.getElementById('openCamBtn').textContent = '📷 Réessayer';
+          return;
+        }
+      }
+
+      // Aucune lib dispo
+      statusEl.textContent = '❌ Détection impossible — saisissez le code manuellement';
+
+    } catch(e) {
+      console.error('FileInput scan error:', e);
+      statusEl.textContent = '❌ Erreur: ' + (e.message || e);
+    }
+  };
+}
+
+// ── Méthode 2 : BarcodeDetector natif (Android Chrome, Safari 17+) ──
+async function startBarcodeScanNative(input, onScanned){
+  if(!('BarcodeDetector' in window)){
+    toast('Scanner non disponible sur ce navigateur. Saisissez le code manuellement.', 'warn');
+    return;
+  }
+  try {
+    const supported = await BarcodeDetector.getSupportedFormats();
+    const detector = new BarcodeDetector({ formats: supported });
+    const stream = await navigator.mediaDevices.getUserMedia({
+      video: { facingMode: 'environment', width:{ideal:1280}, height:{ideal:720} }
+    });
+
+    const overlay = document.createElement('div');
+    overlay.id='scanOverlay';
+    overlay.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,0.92);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:16px';
+    overlay.innerHTML = `
+      <div style="width:100%;max-width:440px;background:#12100c;border:1px solid var(--border);border-radius:16px;padding:16px">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div style="font-weight:700;color:var(--amber)"><i class="ri-qr-scan-2-line"></i> Scanner (mode natif)</div>
+          <button id="closeScan2" style="background:transparent;border:none;color:var(--text3);font-size:22px;cursor:pointer"><i class="ri-close-line"></i></button>
+        </div>
+        <video id="scanVideo" autoplay playsinline muted style="width:100%;border-radius:10px;background:#000;max-height:60vh"></video>
+        <div style="margin-top:10px;font-size:12px;color:var(--text4);text-align:center">📷 Pointez vers le code-barres</div>
+      </div>`;
+    document.body.appendChild(overlay);
+
+    const video = document.getElementById('scanVideo');
+    video.srcObject = stream;
+    await video.play();
+
+    let scanning = true;
+    function stopAll(){
+      scanning = false;
+      stream.getTracks().forEach(t=>t.stop());
+      const el=document.getElementById('scanOverlay'); if(el) el.remove();
+    }
+
+    document.getElementById('closeScan2').onclick = stopAll;
+
+    // Scan loop
+    (async function scanLoop(){
+      while(scanning){
+        try {
+          const barcodes = await detector.detect(video);
+          if(barcodes.length > 0){
+            stopAll();
+            onScanned(barcodes[0].rawValue);
+            return;
+          }
+        } catch(_){}
+        await new Promise(r=>setTimeout(r,120));
+      }
+    })();
+
+  } catch(e){
+    console.error('Native scan error:', e);
+    if(e && e.name==='NotAllowedError'){
+      toast('❌ Permission caméra refusée. Activez-la dans les réglages du navigateur.', 'error');
+    } else {
+      toast('Scanner indisponible. Saisissez le code manuellement.', 'warn');
     }
   }
 }
@@ -1958,24 +3292,114 @@ window.switchTab = function(tab){
 // Sauvegarde automatique avant de quitter
 window.addEventListener('beforeunload', (e)=>{
   try{
-    save('base'); save('queue'); save('templates'); save('mapping'); save('productTpl'); save('history'); save('tplLayout');
+    save('base'); save('queue'); save('templates'); save('mapping'); save('productTpl'); save('history'); save('tplLayout'); save('textColors');
     if(window.playablesSDK){ window.playablesSDK.sendEvent('app_exit', {ts:Date.now()}); }
   }catch(err){}
 });
 
-  loadCanvasFonts();
-})();
-</script>
+loadCanvasFonts();
 
-<script>
+// ═══════════════════════════════════════════════════════════════
+// PWA — SERVICE WORKER + INSTALL PROMPT + AIDE
+// ═══════════════════════════════════════════════════════════════
+
+let _swReg = null;
+let _deferredInstall = null;
+
+// Enregistrement Service Worker
 if('serviceWorker' in navigator){
-  const code = `self.addEventListener('install',e=>self.skipWaiting());self.addEventListener('activate',e=>self.clients.claim());self.addEventListener('fetch',e=>{});`;
-  navigator.serviceWorker.register(URL.createObjectURL(new Blob([code],{type:'text/javascript'}))).catch(()=>{});
+  window.addEventListener('load', ()=>{
+    navigator.serviceWorker.register('sw.js').then(reg=>{
+      _swReg = reg;
+      console.log('[PWA] SW enregistré:', reg.scope);
+
+      // Détection mise à jour
+      reg.addEventListener('updatefound', ()=>{
+        const newW = reg.installing;
+        newW.addEventListener('statechange', ()=>{
+          if(newW.state === 'installed' && navigator.serviceWorker.controller){
+            document.getElementById('pwaUpdateBanner').style.display = 'block';
+          }
+        });
+      });
+    }).catch(err=>{ console.warn('[PWA] SW échec:', err); });
+  });
 }
-document.addEventListener('DOMContentLoaded',()=>{
-  const c=document.getElementById('codeInput'); if(c){c.inputMode='numeric';c.enterKeyHint='search';}
-  const p=document.getElementById('priceInput'); if(p){p.inputMode='decimal';}
-  const t=window.toast; if(t){window.toast=(m,y)=>{if(navigator.vibrate&&y!=='info')navigator.vibrate(15);return t(m,y)}}
+
+// Appliquer la mise à jour
+function applyUpdate(){
+  if(!_swReg || !_swReg.waiting) return;
+  _swReg.waiting.postMessage({type:'SKIP_WAITING'});
+  window.location.reload();
+}
+
+// Install prompt
+window.addEventListener('beforeinstallprompt', e=>{
+  e.preventDefault();
+  _deferredInstall = e;
+  const btn = document.getElementById('installBtn');
+  if(btn) btn.style.display = 'inline-flex';
+});
+
+function installPWA(){
+  if(!_deferredInstall) return;
+  _deferredInstall.prompt();
+  _deferredInstall.userChoice.then(r=>{
+    if(r.outcome === 'accepted'){
+      toast('✅ Application installée avec succès !', 'success');
+      document.getElementById('installBtn').style.display = 'none';
+    }
+    _deferredInstall = null;
+  });
+}
+
+window.addEventListener('appinstalled', ()=>{
+  toast('✅ Génération A7 installée !', 'success');
+  document.getElementById('installBtn').style.display = 'none';
+});
+
+// ── AIDE ──
+function openHelp(){
+  const m = document.getElementById('helpModal');
+  m.style.display = 'block';
+  document.body.style.overflow = 'hidden';
+  // Statut SW
+  const swEl = document.getElementById('swStatus');
+  if(swEl){
+    if(!('serviceWorker' in navigator)){
+      swEl.textContent = '❌ Non supporté par ce navigateur';
+      swEl.style.color = '#e07d7d';
+    } else if(_swReg){
+      swEl.textContent = '✅ Actif — Mode hors ligne disponible';
+      swEl.style.color = '#7dc47d';
+    } else {
+      swEl.textContent = '⏳ En cours d\'initialisation…';
+      swEl.style.color = 'var(--amber)';
+    }
+  }
+}
+
+function closeHelp(){
+  document.getElementById('helpModal').style.display = 'none';
+  document.body.style.overflow = '';
+}
+
+function showHelpRole(role, btn){
+  document.querySelectorAll('.help-role-content').forEach(el=>{ el.style.display='none'; });
+  document.querySelectorAll('.help-role-btn').forEach(b=>{
+    b.classList.remove('active');
+    b.style.color = 'var(--text3)';
+    b.style.borderBottom = '2px solid transparent';
+  });
+  document.getElementById('help-'+role).style.display = 'block';
+  btn.classList.add('active');
+  btn.style.color = 'var(--amber)';
+  btn.style.borderBottom = '2px solid var(--amber)';
+}
+
+// Fermer aide avec Escape
+document.addEventListener('keydown', e=>{
+  if(e.key==='Escape') closeHelp();
 });
 </script>
 </body>
