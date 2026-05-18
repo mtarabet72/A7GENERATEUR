@@ -1,0 +1,21 @@
+{
+  "name": "Générateur A4 - Mohamed TARABET",
+  "short_name": "GenerateurA4",
+  "description": "Générateur d'affichettes PLV au format A4 (21x29.7 cm).",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#121212",
+  "theme_color": "#ff9800",
+  "icons": [
+    {
+      "src": "icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
