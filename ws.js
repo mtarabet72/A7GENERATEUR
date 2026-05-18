@@ -1,14 +1,15 @@
 const CACHE_NAME = "generateur-a4-v1";
 const urlsToCache = [
   "/",
-  "/GENERATEUR-A4_pwa_1.0.html",
+  "/index.html",
   "/manifest.json",
-  "/styles.css", // Si vous avez un fichier CSS externe
-  "/images/1+1=3.png", // Exemple de picto
-  "/images/1+1 gratuit.png",
-  "/images/2ème à -50%.png",
+  "/styles.css",
+  "/data.js",
+  "/icon-192x192.png",
+  "/icon-512x512.png",
   "https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js",
-  "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"
+  "https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js",
+  "https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"
 ];
 
 self.addEventListener("install", (event) => {
