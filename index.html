@@ -1,411 +1,383 @@
 <!DOCTYPE html>
 <html lang="fr" dir="ltr">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <meta name="theme-color" content="#ff9800">
-  <meta name="description" content="Générateur d'affichettes PLV au format A4 (21x29.7 cm) - Mohamed TARABET">
-
-  <!-- Favicon et icônes PWA -->
-  <link rel="icon" type="image/png" sizes="192x192" href="icon-192x192.png">
-  <link rel="icon" type="image/png" sizes="512x512" href="icon-512x512.png">
-  <link rel="manifest" href="manifest.json">
-
-  <!-- Titre -->
-  <title>Générateur A4 - Mohamed TARABET</title>
-
-  <!-- Styles CSS -->
-  <link rel="stylesheet" href="styles.css">
-
-  <!-- jsPDF et html2canvas pour la génération de PDF -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
-
-  <!-- SheetJS pour l'import/export Excel -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#ff9800">
+    <meta name="description" content="Générateur d'affichettes PLV au format A4 (21x29.7 cm) - Mohamed TARABET">
+    
+    <!-- Favicon et icônes PWA -->
+    <link rel="icon" type="image/png" sizes="192x192" href="icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icon-512x512.png">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Titre -->
+    <title>Générateur A4 - Mohamed TARABET</title>
+    
+    <!-- Styles CSS -->
+    <link rel="stylesheet" href="styles.css">
+    
+    <!-- jsPDF et html2canvas pour la génération de PDF -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    
+    <!-- SheetJS pour l'import/export Excel -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 </head>
-
 <body>
-  <!-- En-tête -->
-  <div class="header">
-    <div>
-      <h1>📄 Générateur A4</h1>
-      <p>Application PLV - Mohamed TARABET</p>
-    </div>
-    <div>
-      <button class="button" onclick="exportToExcel()">📊 Exporter Excel</button>
-      <button class="button-secondary" onclick="document.getElementById('excelFile').click()">📂 Importer Excel</button>
-      <input type="file" id="excelFile" accept=".xlsx, .xls" style="display: none;" onchange="importFromExcel(event)">
-    </div>
-  </div>
-
-  <!-- Onglets -->
-  <div class="tabs">
-    <button class="tab-button active" onclick="openTab('Saisie')">📝 Saisie</button>
-    <button class="tab-button" onclick="openTab('Files')">📁 Files</button>
-    <button class="tab-button" onclick="openTab('Templates')">📑 Templates</button>
-    <button class="tab-button" onclick="openTab('Configuration')">⚙️ Configuration</button>
-    <button class="tab-button" onclick="openTab('Aide')">❓ Aide</button>
-    <button class="tab-button" onclick="openTab('Password')">🔒 Gestion de mot de passe</button>
-  </div>
-
-  <!-- Contenu des onglets -->
-  <div class="container">
-    <!-- Onglet Saisie -->
-    <div id="Saisie" class="tab-content active">
-      <div class="section">
-        <h2 class="section-title">📌 Champs de saisie principaux</h2>
-        <div class="grid-2">
-          <div class="form-group">
-            <label for="gencodeInput">📷 Scan ou saisie du gencode</label>
-            <input type="text" id="gencodeInput" placeholder="Ex: 1234567890123">
-          </div>
-          <div class="form-group">
-            <label for="sectorSelect">🏷️ Secteur</label>
-            <select id="sectorSelect">
-              <option value="Food">Food</option>
-              <option value="NonFood">NonFood</option>
-            </select>
-          </div>
-          <div class="form-group">
-            <label for="designationFRInput">Désignation (FR)</label>
-            <input type="text" id="designationFRInput" placeholder="Ex: Produit X">
-          </div>
-          <div class="form-group">
-            <label for="designationARInput">Désignation (AR)</label>
-            <input type="text" id="designationARInput" placeholder="Ex: المنتج X" dir="rtl">
-          </div>
-          <div class="form-group">
-            <label for="oldPriceInput">💰 Prix barré (ancien prix en DH)</label>
-            <input type="number" id="oldPriceInput" placeholder="Ex: 50.00" step="0.01" min="0">
-          </div>
-          <div class="form-group">
-            <label for="promoPriceInput">💰 Prix promo (prix de vente en DH)</label>
-            <input type="number" id="promoPriceInput" placeholder="Ex: 40.00" step="0.01" min="0">
-          </div>
-          <div class="form-group">
-            <label for="loyaltyPercentInput">🎁 Pourcentage fidélité (%)</label>
-            <input type="number" id="loyaltyPercentInput" placeholder="Ex: 10" step="0.01" min="0" max="100">
-          </div>
-          <div class="form-group">
-            <label>🖼️ Choix du picto</label>
-            <div class="picto-selector" id="pictoSelector">
-              <div class="picto-option selected" data-value="1+1=3" onclick="selectPicto(this)">1+1=3</div>
-              <div class="picto-option" data-value="1+1 gratuit" onclick="selectPicto(this)">1+1 gratuit</div>
-              <div class="picto-option" data-value="2ème à -50%" onclick="selectPicto(this)">2ème à -50%</div>
-              <div class="picto-option" data-value="3ème offert" onclick="selectPicto(this)">3ème offert</div>
-              <div class="picto-option" data-value="promo" onclick="selectPicto(this)">Promo</div>
+    <!-- En-tête -->
+    <div class="header">
+        <div class="header-logo">
+            <span class="logo-icon">📄</span>
+            <div>
+                <h1>GÉNÉRATION A4</h1>
+                <p>Affichettes Hypermarché · Système Étiquettes</p>
             </div>
-            <input type="hidden" id="pictoInput" value="1+1=3">
-          </div>
         </div>
-        <div style="margin-top: 20px;">
-          <button class="button" onclick="previewA4Poster()">👀 Prévisualiser</button>
-          <button class="button" onclick="generateA4Poster()">📄 Générer l'affichette A4 (PDF)</button>
+        <div class="header-status">
+            <button class="status-button" onclick="exportAllToExcel()">💾 Export</button>
+            <span class="status-indicator">File: <span id="fileCount">0</span></span>
+            <span class="status-indicator">Base: <span id="baseCount">0</span></span>
         </div>
-      </div>
-
-      <!-- Prévisualisation -->
-      <div class="section">
-        <h2 class="section-title">👀 Prévisualisation</h2>
-        <div class="preview-container">
-          <div id="previewContent" class="preview">
-            <!-- Le contenu sera généré dynamiquement ici -->
-          </div>
-        </div>
-      </div>
     </div>
 
-    <!-- Onglet Files -->
-    <div id="Files" class="tab-content">
-      <div class="section">
-        <h2 class="section-title">📁 Gestion des fichiers</h2>
-        <p>Cette section permet de gérer les fichiers générés (PDF, Excel, etc.).</p>
-        <div class="template-toolbar">
-          <button class="button" onclick="listFiles()">📂 Lister les fichiers</button>
-          <button class="button-secondary" onclick="clearFiles()">🗑️ Supprimer tous les fichiers</button>
-        </div>
-        <div id="filesList" style="margin-top: 20px;">
-          <p>Les fichiers générés seront listés ici.</p>
-        </div>
-      </div>
+    <!-- Onglets -->
+    <div class="tabs">
+        <button class="tab-button active" onclick="openTab(event, 'Saisie')">📝 SAISIE</button>
+        <button class="tab-button" onclick="openTab(event, 'File')">📁 FILE <span class="badge" id="fileBadge">0</span></button>
+        <button class="tab-button" onclick="openTab(event, 'Base')">💾 BASE</button>
+        <button class="tab-button" onclick="openTab(event, 'Historique')">📜 HISTORIQUE</button>
+        <button class="tab-button" onclick="openTab(event, 'Templates')">📑 TEMPLATES</button>
+        <button class="tab-button" onclick="openTab(event, 'Config')">⚙️ CONFIG</button>
+        <button class="tab-button" onclick="openTab(event, 'Aide')">❓ AIDE</button>
     </div>
 
-    <!-- Onglet Templates -->
-    <div id="Templates" class="tab-content">
-      <div class="section">
-        <h2 class="section-title">📑 Gestion des templates A4</h2>
-        <div class="template-toolbar">
-          <button class="button" onclick="addTemplate()">➕ Ajouter un template</button>
-          <button class="button-secondary" onclick="duplicateTemplate()">📋 Dupliquer le template</button>
-          <button class="button-secondary" onclick="exportTemplates()">💾 Exporter les templates</button>
-          <button class="button-danger" onclick="deleteTemplate()">🗑️ Supprimer le template</button>
-          <input type="file" id="importTemplatesInput" accept=".json" style="display: none;" onchange="importTemplates(event)">
-          <button class="button-secondary" onclick="document.getElementById('importTemplatesInput').click()">📂 Importer des templates</button>
+    <!-- Contenu des onglets -->
+    <div class="container">
+        
+        <!-- ===== ONGLET SAISIE ===== -->
+        <div id="Saisie" class="tab-content active">
+            <div class="saisie-container">
+                
+                <!-- Colonne gauche : Formulaire -->
+                <div class="saisie-form">
+                    
+                    <div class="section">
+                        <h2 class="section-title">CODE PRODUIT</h2>
+                        <p class="input-hint">أدخل الكود أو امسح</p>
+                        <div class="input-with-scan">
+                            <input type="text" id="gencodeInput" placeholder="Scanner ou saisir le code" onkeypress="handleEnterKey(event)">
+                            <button class="scan-button" onclick="focusGencode()">📷</button>
+                        </div>
+                    </div>
+
+                    <div class="section">
+                        <h2 class="section-title">PRIX (DH)</h2>
+                        <input type="number" id="priceInput" placeholder="0,00" step="0.01" min="0" oninput="updatePreview()">
+                    </div>
+
+                    <div class="section">
+                        <h2 class="section-title">UNITÉ / AFFICHAGE</h2>
+                        <select id="unitSelect" onchange="updatePreview()">
+                            <option value="pièce">pièce</option>
+                            <option value="kg">kg</option>
+                            <option value="g">g</option>
+                            <option value="litre">litre</option>
+                            <option value="ml">ml</option>
+                            <option value="paquet">paquet</option>
+                            <option value="boîte">boîte</option>
+                        </select>
+                    </div>
+
+                    <div class="section">
+                        <h2 class="section-title">TEMPLATE</h2>
+                        <select id="templateSelect" onchange="updatePreview()">
+                            <option value="Auto">Auto</option>
+                            <!-- Rempli dynamiquement -->
+                        </select>
+                    </div>
+
+                    <div class="section">
+                        <h2 class="section-title">% FIDÉLITÉ</h2>
+                        <input type="number" id="loyaltyPercentInput" placeholder="Ex: 5 → 5% du prix en points" step="0.01" min="0" max="100" oninput="updatePreview()">
+                    </div>
+
+                    <!-- Couleurs textes -->
+                    <div class="section">
+                        <h2 class="section-title">COULEURS TEXTES (contraste)</h2>
+                        <div class="color-inputs">
+                            <div class="form-group">
+                                <label for="colorDesignation">DÉSIGNATION</label>
+                                <input type="color" id="colorDesignation" value="#FFFFFF" onchange="updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label for="colorPrice">PRIX</label>
+                                <input type="color" id="colorPrice" value="#FF6600" onchange="updatePreview()">
+                            </div>
+                            <div class="form-group">
+                                <label for="colorUnit">UNITÉ</label>
+                                <input type="color" id="colorUnit" value="#F5E6C8" onchange="updatePreview()">
+                            </div>
+                        </div>
+                        <div class="color-buttons">
+                            <button class="button-secondary" onclick="resetColors()">Réinitialiser</button>
+                            <button class="button" onclick="applyColors()">Appliquer</button>
+                        </div>
+                    </div>
+
+                    <!-- Sauvegarde données -->
+                    <div class="section">
+                        <h2 class="section-title">SAUVEGARDE DONNÉES (évite perte si historique vidé)</h2>
+                        <div class="save-buttons">
+                            <button class="button-secondary" onclick="saveData()">💾 Sauvegarder</button>
+                            <button class="button-secondary" onclick="restoreData()">📂 Restaurer</button>
+                        </div>
+                        <button class="button-secondary" style="width: 100%; margin-top: 10px;" onclick="enableAutoRestore()">
+                            📁 Activer auto-restauration (choisir dossier)
+                        </button>
+                    </div>
+
+                    <!-- Bouton principal -->
+                    <button class="button-main" onclick="addToQueue()">
+                        ⊕ AJOUTER À LA FILE — ENTRÉE
+                    </button>
+
+                    <!-- Import Excel -->
+                    <div class="section import-section">
+                        <h2 class="section-title">IMPORT EXCEL → FILE (format: Code·Prix·Unité·Template·%Fidélité)</h2>
+                        <div class="drop-zone" id="dropZone">
+                            <p>📁 Déposer ou cliquer pour importer</p>
+                            <input type="file" id="excelFile" accept=".xlsx, .xls" style="display: none;" onchange="importFromExcel(event)">
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Colonne droite : Aperçu -->
+                <div class="saisie-preview">
+                    <div class="preview-header">
+                        <h2>Aperçu A4</h2>
+                        <button class="button" onclick="generateA4Poster()">📄 Générer PDF</button>
+                    </div>
+                    <div class="preview-container">
+                        <div id="previewContent" class="preview">
+                            <p class="preview-placeholder">— CODE —</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
-        <div class="grid-2">
-          <div>
-            <h3 style="color: var(--primary-color); margin-bottom: 10px;">Liste des templates</h3>
-            <div class="template-list" id="templateList">
-              <!-- Liste des templates sera affichée ici -->
+
+        <!-- ===== ONGLET FILE ===== -->
+        <div id="File" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">📁 FILE D'ATTENTE</h2>
+                <div class="file-toolbar">
+                    <button class="button" onclick="generateAllPDF()">📄 Générer tous les PDF</button>
+                    <button class="button-secondary" onclick="exportFileToExcel()">📊 Exporter File (Excel)</button>
+                    <button class="button-danger" onclick="clearQueue()">🗑️ Vider la file</button>
+                </div>
+                <div id="queueList" class="queue-list">
+                    <p class="empty-message">Aucun produit dans la file d'attente</p>
+                </div>
             </div>
-          </div>
-          <div>
-            <h3 style="color: var(--primary-color); margin-bottom: 10px;">Édition du template</h3>
-            <div class="form-group">
-              <label for="templateNameInput">Nom du template</label>
-              <input type="text" id="templateNameInput" placeholder="Ex: Template Promo">
-            </div>
-            <div class="form-group">
-              <label for="templateDesignationFRInput">Désignation FR par défaut</label>
-              <input type="text" id="templateDesignationFRInput" placeholder="Ex: Produit en promo">
-            </div>
-            <div class="form-group">
-              <label for="templateDesignationARInput">Désignation AR par défaut</label>
-              <input type="text" id="templateDesignationARInput" placeholder="Ex: منتج مع عرض" dir="rtl">
-            </div>
-            <h4 style="color: var(--text-secondary); margin: 15px 0 10px;">Positions des éléments (en mm)</h4>
-            <div class="grid-2">
-              <div>
-                <div class="form-group">
-                  <label for="posDesignationFRX">Désignation FR - X</label>
-                  <input type="number" id="posDesignationFRX" placeholder="X" step="1" min="0" max="210">
-                </div>
-                <div class="form-group">
-                  <label for="posDesignationFRY">Désignation FR - Y</label>
-                  <input type="number" id="posDesignationFRY" placeholder="Y" step="1" min="0" max="297">
-                </div>
-                <div class="form-group">
-                  <label for="posDesignationFRFontSize">Taille police FR</label>
-                  <input type="number" id="posDesignationFRFontSize" placeholder="Taille" step="1" min="8" max="72">
-                </div>
-              </div>
-              <div>
-                <div class="form-group">
-                  <label for="posDesignationARX">Désignation AR - X</label>
-                  <input type="number" id="posDesignationARX" placeholder="X" step="1" min="0" max="210">
-                </div>
-                <div class="form-group">
-                  <label for="posDesignationARY">Désignation AR - Y</label>
-                  <input type="number" id="posDesignationARY" placeholder="Y" step="1" min="0" max="297">
-                </div>
-                <div class="form-group">
-                  <label for="posDesignationARFontSize">Taille police AR</label>
-                  <input type="number" id="posDesignationARFontSize" placeholder="Taille" step="1" min="8" max="72">
-                </div>
-              </div>
-            </div>
-            <div class="grid-2">
-              <div>
-                <div class="form-group">
-                  <label for="posGencodeX">Gencode - X</label>
-                  <input type="number" id="posGencodeX" placeholder="X" step="1" min="0" max="210">
-                </div>
-                <div class="form-group">
-                  <label for="posGencodeY">Gencode - Y</label>
-                  <input type="number" id="posGencodeY" placeholder="Y" step="1" min="0" max="297">
-                </div>
-                <div class="form-group">
-                  <label for="posGencodeFontSize">Taille police Gencode</label>
-                  <input type="number" id="posGencodeFontSize" placeholder="Taille" step="1" min="8" max="72">
-                </div>
-              </div>
-              <div>
-                <div class="form-group">
-                  <label for="posOldPriceX">Prix barré - X</label>
-                  <input type="number" id="posOldPriceX" placeholder="X" step="1" min="0" max="210">
-                </div>
-                <div class="form-group">
-                  <label for="posOldPriceY">Prix barré - Y</label>
-                  <input type="number" id="posOldPriceY" placeholder="Y" step="1" min="0" max="297">
-                </div>
-                <div class="form-group">
-                  <label for="posOldPriceFontSize">Taille police Prix barré</label>
-                  <input type="number" id="posOldPriceFontSize" placeholder="Taille" step="1" min="8" max="72">
-                </div>
-              </div>
-            </div>
-            <div class="grid-2">
-              <div>
-                <div class="form-group">
-                  <label for="posPromoPriceX">Prix promo - X</label>
-                  <input type="number" id="posPromoPriceX" placeholder="X" step="1" min="0" max="210">
-                </div>
-                <div class="form-group">
-                  <label for="posPromoPriceY">Prix promo - Y</label>
-                  <input type="number" id="posPromoPriceY" placeholder="Y" step="1" min="0" max="297">
-                </div>
-                <div class="form-group">
-                  <label for="posPromoPriceFontSize">Taille police Prix promo</label>
-                  <input type="number" id="posPromoPriceFontSize" placeholder="Taille" step="1" min="8" max="72">
-                </div>
-              </div>
-              <div>
-                <div class="form-group">
-                  <label for="posPictoX">Picto - X</label>
-                  <input type="number" id="posPictoX" placeholder="X" step="1" min="0" max="210">
-                </div>
-                <div class="form-group">
-                  <label for="posPictoY">Picto - Y</label>
-                  <input type="number" id="posPictoY" placeholder="Y" step="1" min="0" max="297">
-                </div>
-                <div class="form-group">
-                  <label for="posPictoWidth">Largeur Picto</label>
-                  <input type="number" id="posPictoWidth" placeholder="Largeur" step="1" min="10" max="200">
-                </div>
-                <div class="form-group">
-                  <label for="posPictoHeight">Hauteur Picto</label>
-                  <input type="number" id="posPictoHeight" placeholder="Hauteur" step="1" min="10" max="200">
-                </div>
-              </div>
-            </div>
-            <div class="grid-2">
-              <div>
-                <div class="form-group">
-                  <label for="posLoyaltyX">Fidélité - X</label>
-                  <input type="number" id="posLoyaltyX" placeholder="X" step="1" min="0" max="210">
-                </div>
-                <div class="form-group">
-                  <label for="posLoyaltyY">Fidélité - Y</label>
-                  <input type="number" id="posLoyaltyY" placeholder="Y" step="1" min="0" max="297">
-                </div>
-                <div class="form-group">
-                  <label for="posLoyaltyFontSize">Taille police Fidélité</label>
-                  <input type="number" id="posLoyaltyFontSize" placeholder="Taille" step="1" min="8" max="72">
-                </div>
-              </div>
-              <div>
-                <div class="form-group">
-                  <label for="posDifferenceX">Différence - X</label>
-                  <input type="number" id="posDifferenceX" placeholder="X" step="1" min="0" max="210">
-                </div>
-                <div class="form-group">
-                  <label for="posDifferenceY">Différence - Y</label>
-                  <input type="number" id="posDifferenceY" placeholder="Y" step="1" min="0" max="297">
-                </div>
-                <div class="form-group">
-                  <label for="posDifferenceFontSize">Taille police Différence</label>
-                  <input type="number" id="posDifferenceFontSize" placeholder="Taille" step="1" min="8" max="72">
-                </div>
-              </div>
-            </div>
-            <button class="button" onclick="saveTemplate()">💾 Sauvegarder le template</button>
-          </div>
         </div>
-      </div>
-    </div>
 
-    <!-- Onglet Configuration -->
-    <div id="Configuration" class="tab-content">
-      <div class="section">
-        <h2 class="section-title">⚙️ Configuration générale</h2>
-        <div class="grid-2">
-          <div>
-            <div class="form-group">
-              <label for="defaultSectorInput">Secteur par défaut</label>
-              <select id="defaultSectorInput">
-                <option value="Food">Food</option>
-                <option value="NonFood">NonFood</option>
-              </select>
+        <!-- ===== ONGLET BASE ===== -->
+        <div id="Base" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">💾 BASE DE DONNÉES</h2>
+                <div class="base-toolbar">
+                    <button class="button" onclick="saveToBase()">💾 Sauvegarder la sélection</button>
+                    <button class="button-secondary" onclick="exportBaseToExcel()">📊 Exporter Base (Excel)</button>
+                    <button class="button-secondary" onclick="importBaseFromExcel()">📂 Importer Base (Excel)</button>
+                    <button class="button-danger" onclick="clearBase()">🗑️ Vider la base</button>
+                </div>
+                <div id="baseList" class="base-list">
+                    <p class="empty-message">Aucune donnée dans la base</p>
+                </div>
             </div>
-            <div class="form-group">
-              <label for="defaultPictoInput">Picto par défaut</label>
-              <select id="defaultPictoInput">
-                <option value="1+1=3">1+1=3</option>
-                <option value="1+1 gratuit">1+1 gratuit</option>
-                <option value="2ème à -50%">2ème à -50%</option>
-                <option value="3ème offert">3ème offert</option>
-                <option value="promo">Promo</option>
-              </select>
-            </div>
-          </div>
-          <div>
-            <div class="form-group">
-              <label for="defaultTemplateInput">Template par défaut</label>
-              <select id="defaultTemplateInput">
-                <!-- Rempli dynamiquement -->
-              </select>
-            </div>
-          </div>
         </div>
-        <button class="button" onclick="saveConfiguration()">💾 Sauvegarder la configuration</button>
-      </div>
-    </div>
 
-    <!-- Onglet Aide -->
-    <div id="Aide" class="tab-content">
-      <div class="section">
-        <h2 class="section-title">❓ Aide et documentation</h2>
-        <h3 style="color: var(--primary-color); margin-bottom: 10px;">📖 Guide d'utilisation</h3>
-        <p><strong>1. Onglet Saisie :</strong> Saisissez les informations de base pour générer une affichette A4 (gencode, désignations, prix, picto, etc.).</p>
-        <p><strong>2. Onglet Files :</strong> Gérez les fichiers générés (PDF, Excel).</p>
-        <p><strong>3. Onglet Templates :</strong> Créez, modifiez ou supprimez des templates pour personnaliser la mise en page des affichettes.</p>
-        <p><strong>4. Onglet Configuration :</strong> Définissez les valeurs par défaut (secteur, picto, template).</p>
-        <p><strong>5. Onglet Gestion de mot de passe :</strong> Protégez l'accès à l'application.</p>
-        <h3 style="color: var(--primary-color); margin: 20px 0 10px;">📌 Règles de calcul</h3>
-        <ul>
-          <li><strong>Secteur Food :</strong> La différence (prix barré - prix promo) est affichée uniquement si elle est ≥ 5 DH.</li>
-          <li><strong>Secteur NonFood :</strong> La différence est affichée uniquement si elle est ≥ 10% du prix barré.</li>
-        </ul>
-        <h3 style="color: var(--primary-color); margin: 20px 0 10px;">🔧 Dépannage</h3>
-        <p>Si une affichette ne s'affiche pas correctement :</p>
-        <ul>
-          <li>Vérifiez que tous les champs sont remplis.</li>
-          <li>Assurez-vous que les positions X/Y des éléments dans le template sont valides (entre 0 et 210 pour X, 0 et 297 pour Y).</li>
-          <li>Essayez de rafraîchir la page ou de vider le cache du navigateur.</li>
-        </ul>
-      </div>
-    </div>
-
-    <!-- Onglet Gestion de mot de passe -->
-    <div id="Password" class="tab-content">
-      <div class="section">
-        <h2 class="section-title">🔒 Gestion de mot de passe</h2>
-        <div class="grid-2">
-          <div>
-            <h3 style="color: var(--primary-color); margin-bottom: 10px;">Changer le mot de passe</h3>
-            <div class="form-group">
-              <label for="currentPasswordInput">Mot de passe actuel</label>
-              <input type="password" id="currentPasswordInput" placeholder="Saisissez votre mot de passe actuel">
+        <!-- ===== ONGLET HISTORIQUE ===== -->
+        <div id="Historique" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">📜 HISTORIQUE</h2>
+                <div class="history-toolbar">
+                    <button class="button-secondary" onclick="exportHistoryToExcel()">📊 Exporter Historique</button>
+                    <button class="button-danger" onclick="clearHistory()">🗑️ Vider l'historique</button>
+                </div>
+                <div id="historyList" class="history-list">
+                    <p class="empty-message">Aucun élément dans l'historique</p>
+                </div>
             </div>
-            <div class="form-group">
-              <label for="newPasswordInput">Nouveau mot de passe</label>
-              <input type="password" id="newPasswordInput" placeholder="Saisissez un nouveau mot de passe">
-            </div>
-            <div class="form-group">
-              <label for="confirmPasswordInput">Confirmer le nouveau mot de passe</label>
-              <input type="password" id="confirmPasswordInput" placeholder="Confirmez le nouveau mot de passe">
-            </div>
-            <button class="button" onclick="changePassword()">🔄 Changer le mot de passe</button>
-            <div id="passwordMessage" style="margin-top: 10px;"></div>
-          </div>
-          <div>
-            <h3 style="color: var(--primary-color); margin-bottom: 10px;">Options de sécurité</h3>
-            <div class="form-group">
-              <label>
-                <input type="checkbox" id="enablePasswordCheck"> Activer la protection par mot de passe
-              </label>
-            </div>
-            <button class="button" onclick="savePasswordSettings()">💾 Sauvegarder les paramètres</button>
-          </div>
         </div>
-      </div>
-    </div>
-  </div>
 
-  <!-- Fenêtre modale pour la confirmation -->
-  <div id="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0, 0, 0, 0.7); z-index: 1000; justify-content: center; align-items: center;">
-    <div style="background-color: var(--secondary-light); padding: 20px; border-radius: 8px; max-width: 500px; width: 90%;">
-      <h3 id="modalTitle" style="color: var(--primary-color); margin-bottom: 15px;">Confirmation</h3>
-      <p id="modalMessage" style="margin-bottom: 20px;"></p>
-      <div style="display: flex; justify-content: flex-end; gap: 10px;">
-        <button class="button-secondary" onclick="closeModal()">Annuler</button>
-        <button class="button" onclick="confirmModalAction()">Confirmer</button>
-      </div>
-    </div>
-  </div>
+        <!-- ===== ONGLET TEMPLATES ===== -->
+        <div id="Templates" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">📑 Gestion des templates A4</h2>
+                <div class="template-toolbar">
+                    <button class="button" onclick="addTemplate()">➕ Ajouter un template</button>
+                    <button class="button-secondary" onclick="duplicateTemplate()">📋 Dupliquer le template</button>
+                    <button class="button-secondary" onclick="exportTemplates()">💾 Exporter les templates</button>
+                    <button class="button-danger" onclick="deleteTemplate()">🗑️ Supprimer le template</button>
+                    <input type="file" id="importTemplatesInput" accept=".json" style="display: none;" onchange="importTemplates(event)">
+                    <button class="button-secondary" onclick="document.getElementById('importTemplatesInput').click()">📂 Importer des templates</button>
+                </div>
+                <div class="grid-2">
+                    <div>
+                        <h3 style="color: var(--primary-color); margin-bottom: 10px;">Liste des templates</h3>
+                        <div class="template-list" id="templateList">
+                            <!-- Liste des templates sera affichée ici -->
+                        </div>
+                    </div>
+                    <div>
+                        <h3 style="color: var(--primary-color); margin-bottom: 10px;">Édition du template</h3>
+                        <div class="form-group">
+                            <label for="templateNameInput">Nom du template</label>
+                            <input type="text" id="templateNameInput" placeholder="Ex: Template Promo">
+                        </div>
+                        
+                        <h4 style="color: var(--text-secondary); margin: 15px 0 10px;">Positions des éléments (en mm)</h4>
+                        
+                        <!-- Position Prix -->
+                        <div class="position-group">
+                            <label>PRIX</label>
+                            <div class="grid-3">
+                                <input type="number" id="posPriceX" placeholder="X" step="1" min="0" max="210">
+                                <input type="number" id="posPriceY" placeholder="Y" step="1" min="0" max="297">
+                                <input type="number" id="posPriceFontSize" placeholder="Taille" step="1" min="8" max="200">
+                            </div>
+                        </div>
 
-  <!-- Scripts -->
-  <script src="data.js"></script>
+                        <!-- Position Unité -->
+                        <div class="position-group">
+                            <label>UNITÉ</label>
+                            <div class="grid-3">
+                                <input type="number" id="posUnitX" placeholder="X" step="1" min="0" max="210">
+                                <input type="number" id="posUnitY" placeholder="Y" step="1" min="0" max="297">
+                                <input type="number" id="posUnitFontSize" placeholder="Taille" step="1" min="8" max="72">
+                            </div>
+                        </div>
+
+                        <!-- Position Gencode -->
+                        <div class="position-group">
+                            <label>GENCODE</label>
+                            <div class="grid-3">
+                                <input type="number" id="posGencodeX" placeholder="X" step="1" min="0" max="210">
+                                <input type="number" id="posGencodeY" placeholder="Y" step="1" min="0" max="297">
+                                <input type="number" id="posGencodeFontSize" placeholder="Taille" step="1" min="8" max="72">
+                            </div>
+                        </div>
+
+                        <!-- Position Fidélité -->
+                        <div class="position-group">
+                            <label>FIDÉLITÉ</label>
+                            <div class="grid-3">
+                                <input type="number" id="posLoyaltyX" placeholder="X" step="1" min="0" max="210">
+                                <input type="number" id="posLoyaltyY" placeholder="Y" step="1" min="0" max="297">
+                                <input type="number" id="posLoyaltyFontSize" placeholder="Taille" step="1" min="8" max="72">
+                            </div>
+                        </div>
+
+                        <button class="button" onclick="saveTemplate()" style="margin-top: 20px;">💾 Sauvegarder le template</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ===== ONGLET CONFIG ===== -->
+        <div id="Config" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">⚙️ Configuration générale</h2>
+                <div class="grid-2">
+                    <div>
+                        <div class="form-group">
+                            <label for="defaultUnitInput">Unité par défaut</label>
+                            <select id="defaultUnitInput">
+                                <option value="pièce">pièce</option>
+                                <option value="kg">kg</option>
+                                <option value="g">g</option>
+                                <option value="litre">litre</option>
+                                <option value="ml">ml</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="defaultTemplateInput">Template par défaut</label>
+                            <select id="defaultTemplateInput">
+                                <!-- Rempli dynamiquement -->
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="enablePasswordCheck"> Activer la protection par mot de passe
+                            </label>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="autoSaveCheck"> Auto-sauvegarde toutes les 5 minutes
+                            </label>
+                        </div>
+                    </div>
+                </div>
+                <button class="button" onclick="saveConfiguration()">💾 Sauvegarder la configuration</button>
+            </div>
+        </div>
+
+        <!-- ===== ONGLET AIDE ===== -->
+        <div id="Aide" class="tab-content">
+            <div class="section">
+                <h2 class="section-title">❓ Aide et documentation</h2>
+                <h3 style="color: var(--primary-color); margin-bottom: 10px;">📖 Guide d'utilisation</h3>
+                <div class="aide-content">
+                    <p><strong>1. Onglet SAISIE :</strong> Saisissez les informations de base pour générer une affichette A4 (gencode, prix, unité, etc.).</p>
+                    <p><strong>2. Onglet FILE :</strong> Gérez la file d'attente des produits avant génération massive.</p>
+                    <p><strong>3. Onglet BASE :</strong> Sauvegardez vos produits fréquents dans une base de données.</p>
+                    <p><strong>4. Onglet HISTORIQUE :</strong> Consultez l'historique de toutes les affichettes générées.</p>
+                    <p><strong>5. Onglet TEMPLATES :</strong> Créez, modifiez ou supprimez des templates pour personnaliser la mise en page.</p>
+                    <p><strong>6. Onglet CONFIG :</strong> Définissez les valeurs par défaut et les paramètres de sécurité.</p>
+                    
+                    <h3 style="color: var(--primary-color); margin: 20px 0 10px;">⌨️ Raccourcis clavier</h3>
+                    <ul>
+                        <li><strong>Entrée</strong> : Ajouter à la file depuis le champ code produit</li>
+                        <li><strong>Ctrl + S</strong> : Sauvegarder les données</li>
+                        <li><strong>Ctrl + P</strong> : Générer le PDF</li>
+                    </ul>
+
+                    <h3 style="color: var(--primary-color); margin: 20px 0 10px;">🔧 Dépannage</h3>
+                    <p>Si une affichette ne s'affiche pas correctement :</p>
+                    <ul>
+                        <li>Vérifiez que tous les champs sont remplis.</li>
+                        <li>Assurez-vous que les positions X/Y des éléments dans le template sont valides (entre 0 et 210 pour X, 0 et 297 pour Y).</li>
+                        <li>Essayez de rafraîchir la page ou de vider le cache du navigateur.</li>
+                    </ul>
+
+                    <h3 style="color: var(--primary-color); margin: 20px 0 10px;">📞 Support</h3>
+                    <p>Développé par Mohamed TARABET</p>
+                    <p>Version 2.0 - 2024</p>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Fenêtre modale pour la confirmation -->
+    <div id="modal" class="modal">
+        <div class="modal-content">
+            <h3 id="modalTitle">Confirmation</h3>
+            <p id="modalMessage"></p>
+            <div class="modal-buttons">
+                <button class="button-secondary" onclick="closeModal()">Annuler</button>
+                <button class="button" onclick="confirmModalAction()">Confirmer</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="data.js"></script>
 </body>
 </html>
