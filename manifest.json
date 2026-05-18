@@ -1,7 +1,7 @@
 {
   "name": "Générateur A4 - Mohamed TARABET",
   "short_name": "GenerateurA4",
-  "description": "Générateur d'affichettes PLV au format A4 (21x29.7 cm).",
+  "description": "Application pour générer des affichettes PLV au format A4 (21x29.7 cm) avec gestion des templates, calculs de différences (Food/NonFood), et design dark/orange.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#121212",
